@@ -1,0 +1,2466 @@
+
+
+
+\documentclass[journal]{IEEEtran}
+
+% *** CITATION PACKAGES ***
+\usepackage{cite}
+\usepackage{float,lscape}
+
+% *** GRAPHICS RELATED PACKAGES ***
+\ifCLASSINFOpdf
+ \usepackage[pdftex]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../pdf/}{../jpeg/}} and their extensions so you won't have to
+  % specify these with every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+\else
+  % or other class option (dvipsone, dvipdf, if not using dvips). graphicx will
+  % default to the driver specified in the system graphics.cfg if no driver is
+  % specified.
+  % \usepackage[dvips]{graphicx} declare the path(s) where your graphic files
+  % are \graphicspath{{../eps/}} and their extensions so you won't have to
+  % specify these with every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.eps}
+\fi
+
+
+% *** MATH PACKAGES ***
+\usepackage[cmex10]{amsmath}
+\usepackage{multirow} 
+\usepackage{multicol} 
+\usepackage{tabu}
+% *** SPECIALIZED LIST PACKAGES ***
+\usepackage{algorithmic}
+% algorithmic.sty was written by Peter Williams and Rogerio Brito.
+\usepackage{array}
+
+% *** SUBFIGURE PACKAGES ***
+\ifCLASSOPTIONcompsoc
+  \usepackage[caption=false,font=normalsize,labelfont=sf,textfont=sf]{subfig}
+\else
+  \usepackage[caption=false,font=footnotesize]{subfig}
+\fi
+
+% *** FLOAT PACKAGES ***
+\usepackage{fixltx2e}
+% fixltx2e, the successor to the earlier fix2col.sty, was written by
+% \usepackage{stfloats} stfloats.sty was written by Sigitas Tolusis. This
+% package gives LaTeX2e
+\usepackage{dblfloatfix}
+\usepackage{color,soul}
+% The latest version can be found at:
+% http://www.ctan.org/tex-archive/macros/latex/contrib/dblfloatfix/
+
+\usepackage{url}
+
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+
+\begin{document}
+%  paper title can use linebreaks \\ within to get better formatting as desired
+% Do not put math or special symbols in the title.
+\title{Middleware for IoT: state-of-the art and challenges}
+%   author names and IEEE memberships note positions of commas and nonbreaking
+% spaces ( ~ ) LaTeX will not break a structure at a ~ so this keeps an author's
+% name from being broken across two lines.
+% use \thanks{} to gain access to the first footnote area a separate \thanks
+% must be used for each paragraph as LaTeX2e's \thanks was not built to handle
+% multiple paragraphs
+
+\author{M.A.~Razzaque,%~\IEEEmembership{Member,~IEEE,}
+        ~ Marija ~M. Jevric,
+        ~Andrei Palade,
+       ~ and Siobh\'an~Clarke,
+        % % stops a space
+\thanks{M. A. Razzaque, Marija ~M. Jevric, Andrei Palade, and
+Siobh\'an~Clarke are with the Distributed Systems Group, School of Computer
+Science and Statistics, Trinity College Dublin, e-mail: razzaqum@tcd.ie}% <-this stops a space
+
+% \thanks{, is wwith the Distributed Systems Group, School
+% of Computer Science and Statistics, Trinity College Dublin, e-mail:
+% razzaqum@tcd.ie }
+% 
+% \thanks{, is with the Distributed Systems Group,
+% School of Computer Science and Statistics, Trinity College Dublin, e-mail:
+% razzaqum@tcd.ie}%
+% 
+% \thanks{Siobh\'an~Clarke is with the Distributed Systems Group, School of
+% Computer Science and Statistics, Trinity College Dublin, e-mail:
+% razzaqum@tcd.ie}%
+% <-this % stops a space
+\thanks{Manuscript received Dec. 24, 2014; revised , 2015.}}
+
+
+% The paper headers
+\markboth{IEEE INTERNET OF THINGS JOURNAL,~Vol.~0, No.~0, January~201x}
+{Razzaque \MakeLowercase{\textit{et al.}}: Middleware for IoT:
+state-of-the art and challenges}
+
+
+
+
+% make the title area
+\maketitle
+
+% As a general rule, do not put math, special symbols or citations in the
+% abstract or keywords.
+\begin{abstract}
+The Internet-of-Things (IoT) envisages a future in which digital and physical things
+or objects (e.g., smartphones, TVs, cars) can be connected by means of suitable
+information and communication technologies, to enable a range of
+applications and services. The IoT's characteristics, including an ultra large-scale
+network of things, device and network level heterogeneity, and the large number
+of events generated spontaneously by these things, will make development of the diverse
+applications and services a very challenging task. In general, middleware can
+ease the development process by integrating heterogeneous computing and
+communications devices and supporting interoperability within the diverse
+applications and services. Recently, there have been a number of proposals
+for IoT middleware. These proposals are mostly based on Wireless Sensor Networks
+(WSNs), a key component of IoT but do not consider Radio-Frequency
+IDentification (RFID), Machine to Machine (M2M) communications, and Supervisory
+Control and Data Acquisition (SCADA), other three core elements in the IoT
+vision. Taking a holistic view, in this article, we outline a set of requirements for 
+IoT middleware, and present a comprehensive review of the existing
+middleware solutions against those requirements. In addition, open research issues, challenges and future research
+directions are highlighted.
+
+
+\end{abstract}
+% Note that keywords are not normally used for peerreview papers.
+\begin{IEEEkeywords}
+Mobile Adhoc Networks, Vehicular Adhoc Networks, Adaptive Composition, Dynamically Adaptive, Scalability
+\end{IEEEkeywords}
+
+
+
+% For peer review papers, you can put extra information on the cover
+% page as needed:
+% \ifCLASSOPTIONpeerreview
+% \begin{center} \b
+% For peerreview papers, this IEEEtran command inserts a page break and
+% creates the second title. It will be ignored for other modes.
+\IEEEpeerreviewmaketitle
+
+
+\section{Introduction}
+
+
+
+With the advance of numerous technologies including sensors, actuators,
+embedded computing and cloud computing, and the emergence of a new generation of
+cheaper, smaller wireless devices, many objects or things in our
+daily lives are becoming wirelessly interoperable with attached miniature and
+low-powered or passive wireless devices (e.g., passive RFID
+tags). The Wireless World Research Forum predicts that by 2017, there will be 7
+trillion wireless devices serving 7 billion people~\cite{WWRF2006}, one thousand
+devices per person. This ultra large number of connected things or devices will
+form the Internet of Things (IoT)~\cite{FutureInternet07, IoTCharacterstics10}.
+
+By enabling easy access of, and interaction with, a wide variety of physical devices
+or things such as, home appliances, surveillance cameras, monitoring sensors,
+actuators, displays, vehicles, machines and so on, the IoT will foster the
+development of applications in many different domains, such as home automation,
+industrial automation, medical aids, mobile healthcare, elderly assistance,
+intelligent energy management and smart grids, automotive, traffic management,
+and many others~\cite{IoTSmartCity13}. These applications will make use of the
+potentially enormous amount and variety of data generated by such objects to
+provide new services to citizens, companies, and public
+administrations~\cite{IoTvison13,IoTCharacterstics10}.
+
+
+In a ubiquitous computing environment like IoT, it is impractical to impose
+standards and make everyone comply. An ultra large-scale network of things and the
+large number of events that can be generated spontaneously by these things, along
+with heterogeneous devices/technologies/applications of IoT bring new
+challenges in developing applications, and make the existing challenges in 
+ubiquitous computing considerably more
+difficult~\cite{FutureInternet07,IoTCharacterstics10}. In this context, a
+middleware can offer common services for applications and ease application
+development by integrating heterogeneous computing and communications devices
+and supporting interoperability within the diverse applications and services
+running on these devices. Complementary to middleware are programming language
+approaches~\cite{SemanticMiddleware08,MANETProgarmming05}. These approaches 
+tackle some of the challenges (such as discovery, network disconnections, and
+group communication) posed by the IoT, fail to support others such as
+context-awareness (e.g., context-aware service discovery) and scalability.
+
+
+
+WSNs, RFID, M2M communications, and SCADA are the four essential components of IoT~\cite{IoTMiddlewareBook12,
+ContextIoT13}. A fully functional IoT middleware needs to integrate WSNs, RFID,
+M2M, and SCADA technologies to support the envisioned diverse application
+domains~\cite{IoTMiddlewareBook12}. Unfortunately, most existing proposals and
+surveys~\cite{GSN06,azzara2013middleware,issarny2011service,
+SurveyIoTmiddleware11,Book2013} for IoT middleware do not consider these technologies in a single solution. 
+Moreover, the majority of the existing IoT
+middleware proposals~\cite{aberer2006global, musolesi2005emma,fok2009agilla,
+SurveyIoTmiddleware11,silva2014prisma} are WSNs centric. A number
+of surveys have been conducted on WSNs middlewares~\cite{hadim2006middleware,
+WangSurvey2008,schmidt2002middleware, MiddlewareWSNSurvey12,
+li2014middleware,bhuyan2014survey}, these are either not comprehensive ~\cite{MiddlewareWSNSurvey12,
+li2014middleware,bhuyan2014survey} or do not report more 
+recent work ~\cite{hadim2006middleware, WangSurvey2008,schmidt2002middleware}. 
+From these surveys, it is evident
+that no single existing middleware can support all the necessary functional and
+non-functional requirements for WSNs as well as IoT applications. For instance,
+Perera et al \cite{ContextIoT13} identified that most existing WSN
+middleware and IoT-focused solutions do not support context-awareness. In addition, 
+unlike WSNs, the number of middleware proposals for RFID as well as M2M
+communications and SCADA is limited~\cite{RFIDMiddleware09, scada10,
+M2M11,IoTMiddlewareBook12, HeterogenistyIoTMiddleware12, M2M13}.
+
+ Research into IoT, especially in IoT middleware is still in its early stage.
+ Nonetheless, IoT-specific middlewares are emerging ~\cite{ IoTMiddleware10, SematnicMiddlewareIoT10
+ ,ResourceMiddlewareIoT12, IoTMiddlewareBook12,SoAIoTMiddleware11,Book2013,
+ MOSDEN14} as are some surverys~\cite{RoleofMiddlewareIoT11,SurveyIoTmiddleware11,IoTMiddlewareBook12}. 
+ Bandyopadhyay et al ~\cite{RoleofMiddlewareIoT11} have highlighted
+ the importance of a middleware system in IoT. They also presented a survey
+ on IoT middlewares in \cite{SurveyIoTmiddleware11}. However, this is already
+dated, and does not include most IoT-specific
+ middlewares~\cite{ResourceMiddlewareIoT12,
+ IoTMiddlewareBook12,SoAIoTMiddleware11,Book2013, MOSDEN14}.
+ Zhou has presented an overview of the existing
+ middlewares for WSNs, RFID, M2M and SCADA  ~\cite{IoTMiddlewareBook12}, 
+ and has also presented a unified
+ framework for IoT middleware based on service orientation. Implementation
+ detail is not available and like~\cite{SurveyIoTmiddleware11}, 
+ \cite{IoTMiddlewareBook12}, does not include recent, and IoT-specific
+ middlewares~\cite{Book2013, MOSDEN14}.
+
+
+Considering the importance of IoT in various domains, this article 
+takes a holistic view of middleware for IoT and (i)
+identifies the key characteristics of IoT and the requirements of IoT's
+middleware (section 2), (ii) based on the identified requirements, presents a
+comprehensive review of the existing middleware systems focusing on current,
+state-of-the-art research (section 3),  and (iii) outlines open
+research challenges, recommending future research directions (section 4).
+
+
+\section{Background}
+
+\subsection{IoT and its Characteristics}
+%
+In recent years, the IoT has gained significant attention in academia
+and industry~\cite{IoTSurvey10}. IoT enables a world where all the objects
+around us will be connected to the Internet and interact with each other with very
+little or no human intervention~\cite{SemanticWeb09}. The eventual goal is to
+make a better world for humans, where things or objects around us know what we like, what
+we want, and what we need and act accordingly without our explicit
+instructions~\cite{AssistedLiving10}.
+
+
+
+Research into IoT is still in its early stage, and a standard definition of
+IoT is not yet available. IoT can be viewed from three
+perspectives:
+Internet-oriented, things-oriented (sensors or smart things) and
+semantic-oriented (knowledge)~\cite{IoTSurvey10}. Also, the IoT can be viewed
+as either supporting consumers (human) or industrial applications and indeed could
+be named as the Human Internet of Things (HIoT) or the Industrial Internet of
+Things (IIoT)~\cite{IIoT13a,IIoT14,IIoT14a,IoTMiddlewareBook12}. Even though these different
+views have evolved because of the interdisciplinary nature of the subject, they are likely
+to intersect in an application domain to achieve the goals of IoT.
+
+
+
+The first definition of IoT was from a ``things oriented"
+perspective, where RFID tags were
+considered as things~\cite{IoTSurvey10}. According to the RFID community, IoT
+can be defined as~\cite{IoT08}, ``The worldwide network of interconnected objects uniquely
+addressable based on standard communication protocols''. According to the
+European Research Cluster of IoT~\cite{IoT10,IoT13}, ``The Internet of Things
+allows people and things to be connected Anytime, Anyplace, with Anything and
+Anyone, ideally using Any path/network and Any service.'' The International
+Telecommunication Union (ITU) views IoT very similarly 
+~\cite{ITU05}: ``From anytime, anyplace connectivity for anyone, we
+will now have connectivity for anything". Semantically, 
+IoT means ``a world-wide network of interconnected objects uniquely
+addressable, based on standard communication protocols"~\cite{IoT08}.
+
+Most existing definitions of IoT do not explicitly highlight the industrial view of
+IoT (IIoT). World leading companies are giving special attention and making
+ significant investments in the IoT for their industrial solutions (IIoT).
+ Even though they are using different and catchy terms such as ``Smarter
+ Planet'' by IBM, ``Internet of Everything'' by Cisco and ``Industrial
+ Internet'' by GE, their main objective is to use IoT to improve industrial
+ production by reducing unplanned machine downtime and significantly reducing
+ energy costs along with number of other potential benefits~\cite{IIoT13a,
+ IIoT13b,IIoT14,IIoT14a,IoTMiddlewareBook12}. The IIoT refers to industrial
+ objects, or ``things'', instrumented with sensors, automatically communicating
+ over a network, without human-to-human or human-to-computer
+interaction, to exchange information and take intelligent decisions with the
+support of advanced analytics~\cite{IIoT14a}.
+
+
+
+The definition of ``things'' in the IoT vision is very wide and includes a
+variety of physical elements.
+These include personal objects we carry around such as smart phones, tablets and
+digital cameras. It also includes elements in our environments (e.g. home,
+vehicle or work), industries (e.g., machines, motor, robot) as well as things
+fitted with tags (RFID or other) which become connected via a gateway device (e.g., a smart
+phone). Based on this view of ``things'', an enormous number of devices and
+things will be connected to the Internet, each providing data and information
+and some, even services.
+
+
+Sensor Networks (SNs) including wireless sensor networks (WSNs), RFID, M2M
+communications and Supervisory
+Control and Data Acquisition (SCADA) are the
+essential components of IoT. As described in more detail in this section, a number 
+of the IoT's characteristics are inherited from one or more of
+these components. For instance, resource
+constrained is inherited from RFID and SNs, and intelligence is inherited from
+WSNs and M2M.  Other characteristics (e.g., ultra large scale network,
+spontaneous interactions) are specific to the IoT. In the following, we briefly 
+present the main characteristics of
+the IoT from infrastructure and application perspectives. 
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=.65\columnwidth]{figures/iot.pdf}
+\caption{Definition of IoT~\cite{IoT10}.}
+\label{fig4}
+\end{figure}
+
+
+\subsubsection{Characteristics of IoT Infrastructure}
+
+
+
+\begin{itemize}
+
+\item[$\bullet$] \textit {Heterogeneous Devices:} The embedded and sensor
+computing nature of many IoT devices means that low-cost computing platforms are likely to be used.
+In fact, to minimize the impact of such devices on the environment and energy
+consumption, low-power radios are likely to be used for connection to the
+Internet.
+Such low-power radios do not use WiFi, or well established cellular network
+technologies. However, the IoT will not be composed only of embedded devices and
+sensors, it will also need higher-order computing devices to perform heavier
+duty tasks (routing, switching, data processing, etc.). Figure~\ref{fig1} broadly categorizes
+the devices we consider as part of the IoT into 6 levels.
+Heterogeneity of these devices is not only in terms of capacity and ability, it
+can also be due to other reasons including multivendor products, application
+requirements, etc.~\cite{ITU05,IoTSmartCity13}.
+
+%Figure~\ref{fig1} presents examples of heterogeneous devices will be used in IoT
+%,keepaspectratio
+\begin{figure*}[ht!]
+\centering
+\includegraphics[width=1.5\columnwidth]{figures/IoTDevices.pdf}
+\caption{Examples of Device Heterogeneity in IoT.}
+\label{fig1}
+\end{figure*}
+
+
+\item[$\bullet$] \textit {Resource Constrained:} Use of embedded computing and
+sensors or WSNs will need a small form factor for the devices, which limits their
+processing, memory, and communication capacity of the devices used in IoT.
+As shown in Figure~\ref{fig1}, resource capacity decreases (e.g.,
+computational, connectivity capabilities, memory requirements) as we move from
+left to right. For example, RFID devices or tags (in the right most side of the
+figure) may not have any processing capacity or even no battery to power
+them. On the other hand, in Figure~\ref{fig1} devices become expensive and
+larger in form-factor when moving to the left.
+
+\item[$\bullet$] \textit {Spontaneous Interaction:} 
+In IoT applications, sudden interactions can take place as objects
+or things move around and come into other objects' communication range, leading to
+the spontaneous generation of events. For instance, a smartphone user can come
+in close contact with a TV/fridge/washing machine at home and that can
+generate events without the user's involvement. Typically, in IoT, an interaction
+with an object means that an event is generated and is pushed to the system
+without much human attention.
+
+
+%% Network charaterstics
+
+\item[$\bullet$] \textit{Ultra Large-Scale Network and Large Number of Events:}
+In an IoT environment, thousands of devices or things may interact with each
+other even in one local place (e.g., in a building, supermarket, university),
+which is much larger scale than most conventional networking systems. Globally,
+the IoT will be an ultra large scale network containing nodes in the scale of
+billions and even in trillions.
+Gartner has reported~\cite{Garner13} that there will be nearly 26 billion
+devices on the IoT by 2020. Similarly, ABI Research~\cite{ABI13} estimated that
+more than 30 billion devices will be wirelessly connected (Internet of
+Everything) by 2020.
+
+In the IoT, spontaneous interactions amongst an ultra large number of things or
+devices, will produce an enormous number of events as normal behavior. This uncontrolled
+number of events may cause problems such as event congestion and reduced event
+processing capability.
+
+
+
+\item[$\bullet$] \textit {Dynamic Network and No Infrastructure:} As shown in
+Figure \ref{fig1}, IoT will integrate devices, most of which will be mobile,
+wirelessly connected, and resource constrained.
+Many nodes within the network may be mobile, and can leave or join anytime they
+want. Also, nodes can be disconnected due to poor wireless links or battery
+shortage. All of these factors will make the network in IoT highly dynamic.
+
+Within such an ad hoc environment, where there is limited or no connection to a 
+fixed infrastructure, it will be difficult to maintain a stable network to
+support many application scenarios that depend on the IoT. Nodes or things will
+need to cooperate to keep the network connected and active.
+ 
+ \item[$\bullet$] \textit {Context-aware:} Context is key in the IoT and its
+ applications. A large number of sensors will generate large amounts of data, which
+ not have any value unless we analyze, interpret, and
+ understand it. Context-aware computing stores context
+ information related to sensor data, easing its interpretation. 
+Context-awareness (especially in temporal and spatial
+ context) plays a vital
+role in the adaptive and autonomous behavior of the things in the
+IoT~\cite{ContextIoT13,ContextIoT13b}. Such behavior will help to eliminate 
+human-centric mediation in the IoT, which ultimately makes it easier to
+perform machine-to-machine communication, a core element of the IoT's vision.
+
+
+
+
+\item [$\bullet$] \textit{Intelligence:}  According to the Intel's IoT vision,
+intelligent device or things and intelligent system of systems are the two key
+elements of IoT~\cite{IoTIntel}. In IoT's dynamic and open network, these
+intelligent entities along with other entities such as web services,
+Service-Oriented Architecture (SOA) components, and virtual objects will be
+interoperable and able to act independently based on the context, circumstances
+or environments~\cite{IntillegenceIoT09,IntillegenceIoT13}.
+
+
+
+\item[$\bullet$] \textit {Location-aware:} Location or spatial information
+about things (objects) or sensors in IoT is critical, as location plays a
+vital role in context-aware computing. In a large-scale network of things,
+interactions are highly dependent on their locations, their surroundings, and
+presence of other entities (e.g., things and people). 
+
+\item[$\bullet$] \textit {Distributed:} The traditional Internet itself is
+a globally distributed network, and so also is the IoT. The strong spatial
+dimension within the IoT makes the network IoT distributed at different
+scales (i.e., both globally like the Internet, and also locally within 
+an application area).
+
+\end{itemize}
+
+\subsubsection{Characteristics of IoT Applications}
+
+\begin{itemize}
+
+
+\item[$\bullet$] \textit {Diverse Applications:} The IoT can offer its services to 
+a large number of applications in numerous domains and environments. These domains and environments can be grouped, non-exhaustively, 
+into domain categories such as: (i) Transportation and logistics, (ii) Healthcare,
+(iii) Smart environment (home, office, plant), (iv) Industrial and (v)
+Personal and social domain. These domains and environments are not exhaustive list of the
+IoT applications. Figure~\ref{fig2} highlights some key application domains for the
+IoT.
+
+Different applications are likely to need different
+deployment architectures (e.g., event driven, time driven) and have different
+requirements, which have to date generally been handled using a proprietary
+implementation. However, since the IoT is connected to the Internet, most of the
+devices comprising IoT services will need to operate utilizing standardized
+technologies.
+
+
+\item[$\bullet$] \textit {Real-time:} Applications using the IoT can be broadly
+classified as real-time and non-real-time. For instance, IoT for healthcare, transportation, etc. will need on-time delivery
+of their data or service. Delayed delivery of data can make the application or
+service useless and even dangerous in mission critical applications. 
+
+\item[$\bullet$] \textit {Everything-as-a-service (XaaS)}:
+An everything-as-a-service model is very efficient, scalable, and easy to
+use~\cite{XaaS11}. The XaaS model has inspired the Sensing as a Service approach
+in WSNs~\cite{SaaS12,SaaS13}, and  this may inevitably lead IoT toward an
+everything-as-a-service (XaaS) model. As more things get connected, the
+collection of services is also likely to grow and as they become accessible online, 
+they will be available for use, and re-use.
+
+
+\item [$\bullet$] \textit {Increased Security Attack-surface:} While there is huge
+potential for the IoT in different domains, there are also concerns for the security
+of applications and networks.
+The IoT needs global connectivity and accessibility, which means that anyone
+can access it anytime and anyway.
+This tremendously increases the attack surfaces for the IoT's applications and
+networks.
+The inherent complexity of the IoT further complicates the design and
+deployment of efficient, interoperable, and scalable security mechanisms. 
+
+\item [$\bullet$] \textit{Privacy Leakage:}  Using the IoT, applications may
+collect information about people's daily activities. As information reflecting
+users' daily activities (e.g., travel routes, buying habits, daily energy usage
+and so on) is considered by many individuals as private, exposure of this
+information could impact the privacy of those individuals. The use of cloud
+computing makes the problem of privacy leakage even worse.
+Any IoT application not compliant with privacy requirements could be prohibited
+by law (e.g., in the EU~\cite{PrivacyEU}) because the violate citizens' privacy.
+
+
+\end{itemize}
+%\section{Heterogeneous communication and computing systems and Middleware Requirements}
+
+%\subsection{Heterogeneous communication and computing systems}
+
+%Figure~\ref{fig1} presents an example of heterogenous communication and computing systems that can be used in smart city applications.
+%
+%\begin{figure}[ht!]
+%\centering
+%\includegraphics[width=.8\columnwidth,keepaspectratio]{hsystems.pdf}
+%\caption{An example of heterogeneous communication systems.}
+%\label{fig1}
+%\end{figure}
+
+
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=.9\columnwidth]{figures/IoTApps.pdf}
+\caption{Potential applications of IoT~\cite{IoTFig1}.}
+\label{fig2}
+\end{figure}
+
+
+
+
+
+\subsection{Middleware in IoT and its requirements}
+
+%Middleware can be viewed in communication as well as computing perspective. In
+%the communication perspective, it can be described as a software layer between
+%applications, the operating system and the network communications layers, the
+%purpose of which is to facilitate and coordinate some aspect of cooperative
+%processing. From the computing perspective, it is defined as a layer between
+%application software and system software. Generally, a middleware abstracts the
+%complexities of the system or hardware, allowing the application developer to
+%focus all efforts on the task to be solved without the distraction of orthogonal
+%concerns at the system or hardware level~\cite{MiddlewarDefinition06}.
+%Considering the communication as well as computing level heterogeneities, in
+%IoT, a middleware which can support both the perspectives is necessary. A
+%middleware in IoT needs to fulfil a number of requirements to become useful
+%and effective. Characteristics of IoT's infrastructure and its applications
+%play a vital role in identifying the requirements of IoT's middleware.
+%Generally, these requirements can be viewed as the requirements for the services a middleware
+%caters and the system architecture of the target middleware. In the following,
+%we summarize those requirements of IoT's middleware.
+
+Generally, a middleware abstracts the complexities of the system or hardware,
+allowing the application developer to focus all his effort on the task to be
+solved, without the distraction of orthogonal concerns at the system or hardware
+level~\cite{MiddlewarDefinition06}.
+Such complexities may be related to communication concerns or to more general
+computation.
+For communication, a middleware provides a software layer between applications,
+the operating system and the network communications layers, the purpose of which
+is to facilitate and coordinate some aspect of cooperative processing. From the
+computing perspective, a middleware provides a layer between application
+software and system software.
+In the IoT, there is likely to be considerable heterogeneity in both the
+communication technologies in use, and also the system level technologies, and a
+middleware should support both perspectives as necessary. In this section, we
+draw on the previously described characteristics of the IoT's infrastructure and
+the applications that depend on it, to identify a set requirements for a
+middleware to support the IoT. As follows, we have grouped these requirements
+into two sets: first, the services such a middleware should provide, and second,
+the system architecture it should support.
+
+% 
+% \begin{figure}[ht!] \centering
+% \includegraphics[width=.9\columnwidth]{figures/IoTApps.pdf}
+% \caption{Middleware hierachy requirements in IoT.}
+% \label{fig2a}
+% \end{figure}
+
+
+\begin{figure*}[ht!]
+\centering
+\includegraphics[width=2.0\columnwidth]{figures/MDReq.pdf}
+\caption{Relationships between the IoT Applications and Infrastructure and
+its Middleware Requirements.}
+\label{fig3}
+\end{figure*}
+
+
+
+\subsubsection{Middleware Service Requirements}
+
+Middleware service requirements for the IoT can be categorized as both
+functional and non-functional. Functional requirements capture the
+services or functions (e.g., abstractions, resource management) a middleware
+provides and non-functional requirements (e.g., reliability, security, availability)
+capture QoS support or performance issues.
+
+Our view of a middleware in this paper is one which provides common or generic
+services to multiple different application domains. In this section, we make no
+attempt to capture domain or application-specific requirements, but focus on generic 
+or common functional ones, as follows:
+
+\begin{itemize}
+  
+  
+\item[$\bullet$] \textit {Resource Discovery:} IoT resources include
+heterogeneous hardware devices (e.g., RFID tags, sensors, sensor mote,
+smartphones), devices' power and memory, analogue to digital convertor
+device (A/D), the communications module
+available on those devices, and infrastructural or network level information
+(e.g., network topology, protocols) and the services provided these devices.
+Assumptions related to global and deterministic knowledge of these resources'
+availability are invalid, as the IoT's infrastructure and environment is
+dynamic. By necessity, human intervention for resource discovery is infeasible,
+and therefore an important requirement for resource discovery is that it be
+automated. Importantly, when there is no infrastructure network, every device
+must announce its presence and the resources it offers. This is a different
+model to the traditional distributed systems one, where resource publication,
+discovery and communication are generally managed by a dedicated server.
+Discovery mechanisms also need to scale well, and there should be efficient
+distribution of discovery load, given the IoT's composition of
+resource-constrained devices.
+
+\item [$\bullet$] \textit{Resource Management:} 
+An acceptable QoS is expected for all applications, and in an environment where resources
+that impact on QoS are constrained, such as the IoT, it is important that applications are provided with
+a service that manages those resources. This means that resource usage should be
+monitored, resources allocated or provisioned in a fair manner, and resource
+conflicts resolved. In IoT architectures, especially in service oriented or
+virtualization based architectures, middleware needs to facilitate resource
+(service) composition if single resource or service fails to satisfy application
+needs.
+
+
+\item [$\bullet$] \textit{Data Management:} Data is key in the IoT applications.
+In IoT, data refers mainly to sensed data or any network infrastructure information 
+of interest to applications.
+An IoT middleware needs to provide data management services to applications, including
+data acquisition, data processing (including pre-processing), and data storage.
+
+
+
+\item [$\bullet$] \textit{Event Management:} There are potentially a massive number of events
+generated in IoT applications, which should be managed as an integral part of an
+IoT middleware. Event management transforms simple observed events into
+meaningful events. It should provide real-time analysis of high-velocity data
+so that downstream applications are driven by accurate, real-time information and intelligence. 
+
+
+\item [$\bullet$] \textit{Code Management:} Deploying code in an IoT environment
+is challenging, and should be directly supported by the middleware. In particular,
+code allocation and code migration services are required. Code
+allocation selects the set of devices or sensor nodes to be used to 
+accomplish a user or application level task. Code
+migration transfers one node/device's code to another one, potentially
+reprogramming nodes in the network. Using code migration services, code is portable, 
+which enables data computation to be re-located. For instance, code can be transferred 
+to nodes close to 
+the area where a comparatively large proportion of the data is collected, facilitating
+potential energy savings through reduced communications.
+\end{itemize}
+
+
+Key non-functional requirements of IoT
+middleware includes scalability, reliability, availability, real-time
+(timeliness), security and privacy, and ease-of deployment.
+
+\begin{itemize}
+
+\item[$\bullet$] \textit{Scalability:} An IoT middleware is scalable when it can
+accommodate an ever increasing growth in the IoT's network and
+applications/services. Considering the size of the IoT's network, IPv6 is a very
+scalable solution for addressability, as it can deal with a huge number of
+things that need to be included in the IoT~\cite{atzori2010internet}. Loose
+coupling and/or virtualization in middleware is useful in improving the
+scalability, especially application and service level scalability by hiding the
+complexity of the underlying hardware or service logic and implementation.
+
+
+
+
+\item[$\bullet$] \textit{Real-time or Timeliness:} A middleware must provide 
+real-time services when the total correctness of an operation it supports depends 
+not only on its logical correctness, but also on the time in which it is performed. 
+As the IoT will deal with many
+real-time applications (e.g., transportation, healthcare), on-time delivery of
+information or services in those applications is critical. Delayed information or
+services in such applications can make the system useless and even dangerous.
+%Delay  of different operations of a middleware in dynamic
+%environments of the IoTs will be useful in judging the real-time or timeliness
+%behavior of it.
+
+\item[$\bullet$] \textit{Reliability:} A middleware is reliable if it can remain
+operational for the duration of a mission, even in the presence of failures.
+In the IoT, reliability has two aspects:
+communication reliability and data or information reliability, both of which 
+should be considered. Reliability is an
+end-to-end QoS metric in the IoT, and technologies and devices from all layers are
+responsible for it.
+
+\item[$\bullet$] \textit{Availability:} A middleware supporting an IoT's
+applications, especially mission critical ones, must 
+be available, or appear available, at all times. Even if there is a failure
+somewhere in the system, its
+recovery time and failure frequency must be small
+enough to achieve the desired availability. 
+The reliability and availability requirements should work together to ensure 
+the highest fault tolerance
+required from an application. 
+
+
+\item[$\bullet$] \textit{Security \& Privacy:} Security at both the things or
+device and network levels including middleware is critical to the operation of
+IoT. In IoT middleware, security needs to be considered in all the functional
+and non-functional blocks including the user level application.
+Context-awareness in middleware may disclose personal information (e.g. the
+location of an object or a person). Like security, every block of middleware,
+which uses personal information, need to preserve privacy of the data owners.
+
+
+\item[$\bullet$] \textit{Ease-of deployment:} Since an IoT middleware 
+(or more likely, updates to the middleware) is typically deployed by the user (or owner of the device), 
+deployment should not require expert knowledge or support. 
+Complicated installation and setup procedures must be avoided.
+
+\end{itemize}
+
+
+\subsubsection{Architectural Requirements}
+
+The architectural requirements included in this section are designed to support
+application developers. They include requirements for programming abstractions,
+and other implementation-level concerns.
+
+\begin{itemize}
+  
+
+\item [$\bullet$] \textit{Programming Abstraction:} Providing an API for
+application developers is the foundation and most important functional
+requirement for any middleware.
+For the application or service developer, high-level programming interfaces
+isolate the development of his applications or services from the operations
+provided by the underlying, heterogeneous IoT infrastructures.
+The level of abstraction, the programming paradigm, and the interface type all
+need to be considered when defining an API. The level of abstraction refers to
+how the application developer views the system (e.g., individual node/device
+level, system level). The programming paradigm (e.g., Publish/Subscribe) deals
+with the model for developing or programming the applications or services. The
+interface type defines the style of the programming interface. For instance,
+descriptive interfaces offer SQL-like languages for data query, XML-based
+specification files for context configuration.
+
+\item[$\bullet$] \textit{Inter-operable:} A middleware is interoperable if it
+can work with heterogeneous devices/technologies/applications or even with other
+middlewares without additional effort from the application or service developer.
+Heterogeneous components must be able to exchange data and services.
+Interoperability in a middleware can be viewed from network, syntactic, and
+semantic perspectives, each of which must be catered for in an IoT.
+A network should exchange information across different networks, potentially
+using different communication technologies.
+Syntactic interoperation should allow for heterogeneous formatting and encoding
+structures of any exchanged information or service. Semantic interoperability is
+related to the meaning of information or service. It can offer
+interoperability for the ever-growing and changing set of devices and services
+in IoT. Meaningful information about services will be useful for the users in
+composing multiple services as semantic data can be better understood by
+``things'' and humans compared to traditional protocol
+descriptions~\cite{semanticInteroperability08,semanticInteroperability08a,SemanticIoT10,semanticInteroperability14}.
+
+
+\item[$\bullet$] \textit{Service-oriented:} A service-oriented paradigm will
+provide high flexibility when new and advanced functions need to be added to the IoT's
+middleware. Service-oriented middleware (SOM) logically views the IoT as a service
+provider for user applications. A SOM provides abstractions for the complex
+underlining hardware through a set of services (e.g., data management,
+reliability, security) needed by the IoT's applications. All these and other advanced
+services can be designed, implemented, and integrated in a SOM framework to
+deliver a flexible and easy environment for application development.
+
+
+\item[$\bullet$] \textit{Adaptive:} A middleware is adaptive when it can evolve to fit
+itself into changes in its environment or circumstances. In the IoT, the network and its
+environment are likely to change frequently. In addition, application-level
+demands or context are also likely to change frequently. To ensure user satisfaction and
+effectiveness of the IoT, a middleware needs to dynamically adapt or adjust itself
+to fit all such variations. 
+
+\item[$\bullet$] \textit{Context-aware:} Context-awareness is a key requirement
+in building adaptive systems and also in establishing value from sensed data.
+The IoT's middleware architecture needs to be aware of the context of users,
+devices, and the environment and use these for effective and essential
+services' offerings to users, as outlined earlier. 
+
+\item[$\bullet$] \textit{Autonomous:} Autonomous means self-governed.
+Devices/technologies/applications are active participants in the IoT's processes
+and they should be enabled to interact and communicate among themselves without
+direct human intervention~\cite{gubbi2013internet,wang2010adaptive}.
+Use of intelligence including \textit{autonomous agents}, embedded
+intelligence~\cite{EmbeddedIntelligence11}, predictive and proactive approaches
+(e.g., a prediction engine) in middleware can fulfil this
+requirement~\cite{modukuri2005autonomous}.
+
+
+\item[$\bullet$] \textit{Distributed:} A large-scale IoT system's
+applications/devices/users (e.g., WSNs, VANETs) exchange information and
+collaborate with each other. Such applications/devices/users are likely to be
+geographically distributed, and so a centralized view or middleware implementation 
+will not be sufficient to support many distributed services or
+applications. A middleware implementation needs to support functions that are
+distributed across the physical infrastructure of the IoT.
+
+
+\end{itemize}
+%\subsubsection{Requirements from the state-of-the-art}
+
+
+Figure~\ref{fig3} presents the relationships between the IoT's middleware
+requirements and its infrastructural and application characteristics. As shown in
+the figure, most of the requirements are directly related (green color text)
+to one or more characteristics of the IoT. A few of them are also indirectly linked
+(black text) to one or more characteristics of the IoT. For instance,
+the real-time behaviour requirement is directly related to the
+application's real-time characteristics and indirectly to the large number of
+events. Also, a few of the middleware requirements (e.g., resource
+discovery, resource management) jointly capture the same set of IoT characteristics. 
+%This could be due their non-orthogonal relationships.
+
+
+
+
+\section{Overview of the existing works}
+ 
+ 
+ 
+Middleware in IoT is a very active research area. A significant number of number
+solutions have been proposed and implemented in this area especially in last
+couple of years.
+These solutions area are highly diverse in their design approaches (e.g. event
+based, database), level of programming abstractions (e.g. local or node level,
+global or network level), and implementation domains (e.g.
+WSNs, RFID, M2M, SCADA). In IoT, a fully functional middleware should support
+all the implementation domains of IoT (e.g. WSNs, RFID, M2M, SCADA). It also
+should cater node or device as well as network level programming abstractions to
+become distributed, and to support number of functional (e.g. resource
+discovery, resource management, data management) and non-functional requirements
+(e.g. security) in a comprehensive way. In this work, we group the existing
+works based on their design approaches. Middlewares within each design approaches will be highlighted on the basis their supported
+requirements. The design approaches of the existing middleware solutions can be
+listed as below:
+ 
+ 
+\begin{itemize}
+ 
+\item Database approach
+\item Event based approach
+    \begin{itemize}
+        \item Service oriented approach
+        \item Message oriented approach
+    \end{itemize}
+\item Application driven approach
+\item Modular approach
+\item Virtual machine approach
+\item Tuple space approach
+\end{itemize}
+ 
+ 
+\subsection{Database oriented design}
+ 
+ 
+In this approach, the sensor network is considered a virtual
+database system.  An application can query the database using a
+Structured Query Language (SQL) like language which enables the
+possibility to formulate complex
+queries\cite{azzara2013middleware}. For example,  Figure
+\ref{fig:sample_query} shows a sample query that calculates the
+average of temperature in a certain location monitored by sensors
+for a given sample size. Although this design Previous research in
+this area has been focused on developing a distributed database
+approach
+ 
+ 
+Other properties:
+\begin{enumerate}
+\item Entire sensor network is abstracted as a virtual relational
+database. Ease to interoperate with existing systems. \item
+Doesn't support real-time applications, and provides only
+approximate results
+\end{enumerate}
+ 
+ 
+% This is SQL script and needs to look like SQL
+\begin{center}
+\begin{figure}[h!]
+    \begin{quote}
+        SELECT AVG(temp) FROM sensor\_list  \\
+        WHERE ( location.X BETWEEN 0 AND 10)  \\
+        AND  (location.Y BETWEEN 0 AND 10) \\
+        SAMPLE\_PERIOD 10 seconds
+    \end{quote}
+\caption{A sample query} \label{fig:sample_query}
+\end{figure}
+\end{center}
+ 
+ 
+The example of database oriented middleware is \textit{SINA}. It
+provides a support for both SQL-like queries and SQTL (Sensor
+Query and Tasking Language). \textit{SINA} is Event-handling
+middleware and it can handle problems like mobility of the
+querying (sink) node \cite{henricksen2006survey}. It is unclear
+whether \textit{SINA} has been implemented or tested.
+ 
+\textit{IrisNet} (Internet-Scale Resource-Intensive Sensor Networks Services) is
+database design oriented SOFTWARE platform which deploys heterogeneous services
+on WMSNs. \textit{IrisNet} allows harnessing a global, wide-area sensor network
+by performing Internet-like queries on this infrastructure. \textit{IrisNet}
+allows users to perform Internet-like queries to video sensors and other data.
+Each query operates over data collected from the global sensor network, and
+allows simple Google-like queries as well as more complex queries involving
+arithmetic and database operators the architecture of IrisNet is two-tiered:
+heterogeneous sensors implement a common shared interface and are called sensing
+agents (SA), while the data produced by sensors is stored in a distributed
+database that is implemented on organizing agents (OA). Different sensing
+services are run simultaneously on the architecture. \textit{IrisNet} is tested
+and the results are publish in \cite{akyildiz2007survey}. It is tested for only
+60 scalar sensor. It should allow testing more complex algorithms and assess the
+scalability of the communication protocols under examination.
+ 
+\textit{HyCache} a User-Level Caching Middleware for Distributed FILE Systems is
+the middleware with database oriented design. It has heterogeneous storage
+devices for distributed file systems and provides standard POSIX interfaces
+through FUSE. It works completely in the user space. The overhead of user-level
+APIs (i.e. libfuse) is negligible with multithread support on SSD, and with
+appropriate tuning can even outperform the kernel-level implementation (e.g.
+Seagate Momentus XT). Evaluation of the performance is conducted and published
+in \cite{zhao2013hycache}.
+ 
+The Global Sensor Networks (GSN) middleware is developed based on
+usage of virtual sensors, using Peer to Peer communication between
+the nodes, data stream a virtual sensor produces is encoded in
+XML, and deploys SQL queries to manage data streams within the
+virtual sensor. Therefore, GSN is classified as a hybrid oriented
+middleware. Virtual sensor can be any device (telephone, desktop,
+laptop) that accept multiple input data streams and produces
+exactly one output data stream. GSN' s ability to access multiple
+stream producers simultaneously. Virtual nodes have high-level
+attributes like: control of the processing priority, control and
+management of resources of a virtual sensor, control of the stored
+data and disconnection if the amount of storage provided is
+temporary disconnected.
+ 
+Using the declarative specifications, virtual sensors can be
+deployed and reconfigured in GSN containers at runtime which makes
+GSN be real-time middleware. GSN is created in order to highly
+dynamic process environment and allow the system to quickly react
+to changing processing needs and environmental conditions. Dynamic
+resource management accomplishes three main tasks: Resource
+sharing, Failure management and Explicit resource control. In
+\cite{aberer2006global}, the experiment was conducted in order to
+show the scalability of GSN in the number of queries and clients.
+It is experienced that as the number of clients increases, the
+average processing time for each client decreases. GSN provides
+simple and uniform access to the host of heterogeneous
+technologies available and it is easy to be deployed.
+ 
+KSpot\textsuperscript{+} is a data-centric distributed middleware
+architecture for WSN \cite{andreou2011towards}. It has capability
+of network-awareness and advanced query semantics to the data
+acquisition by combining the following three components: Tree
+Balancing Module, Workload Balancing Module and Query Processing
+Module. KSpot\textsuperscript{+} is an open-source middleware
+framework that can be utilised in numerous application domains
+including environmental monitoring, structural monitoring, urban
+monitoring, health monitoring, etc. It has been deployed in two
+projects so far. By building the KSpot\textsuperscript{+}
+middleware, several design enquires are taken into the
+consideration, such as: Modularity, Energy-Efficiency, Distributed
+and Autonomous Behavior, Scalability and Accuracy in the presence
+of Failures. \textbf{Modularity} means decomposition of a system
+into a number of components that may be mixed and matched in the
+way to ensure high degree of openness and usability.
+\textbf{Energy-Efficiency} is provided in the way that each module
+is founded on the premise of energy-conscious algorithms that
+minimise energy consumption and increase network longevity.
+KSpot\textsuperscript{+} provides \textbf{Distributed and
+Autonomous Behavior} by focusing on a fully autonomous and
+decentralised behaviour of it own client-side components. More
+specifically, the maintenance of any global state or data
+structures is being minimised at a centralised location and use
+only local knowledge. In developing of KSpot\textsuperscript{+},
+special attention was given to a \textbf{Scalability} property to
+ensure that the performance of the system will maintain acceptable
+QoS standards regardless of the increasing network size. The
+algorithms that operate in each of the KSpot\textsuperscript{+}
+modules have proven to work accurately and efficiently in the
+presence of failure and providing the \textbf{Accuracy in the
+presence of Failures}.
+ 
+ 
+Cougar \cite{tong2009evaluation}, \cite{bonnet2001towards} is
+another middleware applying database pattern in sensor network.
+Cougar is extension of the Cornell Predator object-relational
+database system. In Cougar system, there are two types of data:
+stored data and sensor data. Signal processing functions in each
+sensor node generate the sensor data, and date are communicated or
+stored in local as relations in database system. Signal processing
+functions are modeled by using Abstract Data Type in Cougar. In
+Cougar, each type of sensor is modeled as a new Abstract Data
+Type. Signal-processing functions are modeled as ADT functions
+that return sensor data. Long-running queries are formulated in
+SQL with little modifications to the language. To support the
+evaluation of long-running queries, the query execution engine is
+extended with a new mechanism for the execution of sensor ADT
+functions.
+ 
+Data service Middleware \textit{DsWare} \cite{hadim2006middleware}
+is developed on a database approach but it can be also considered
+as event based because of the way it is fitting in the sensor
+networks. From the architectural point of view, it consists of
+several modules: data storage, data caching, group management,
+event detection, data subscription and scheduling. It uses SQL
+language to manage the events. It has real-time execution
+performance and it is considered as a very reliability middleware.
+It can handle the dynamic nature of sensor network data. His
+reliability relies on the fact that it can be serviced by a group
+of geographically close sensor nodes. In the present form, it
+doesn't support heterogeneity and mobility.
+ 
+ 
+\textit{SensorWare} middleware \cite{boulis2003design} implements
+distributed algorithms and at the same time can hide low-level
+details from the application. It provides a way to share the
+resources of a node among many applications and multiple users of
+Wireless Ad-hoc Sensor Network. SensorWare is conducting the
+dynamic deployment of the distributed algorithms into the network.
+Usually this means that a distributed algorithm has to be
+incorporated in several sensor nodes, which in turn means that
+these sensor nodes have to be dynamically programmed. A
+user-friendly and energy-efficient way of programming the nodes
+keeps the user out-of-the-loop most of the time by allowing sensor
+nodes to program their peers. From the architectural aspect, a
+sensor node in SensorWare can be viewed in layers. The lower
+layers are the raw hardware and the hardware abstraction layer
+(i.e., the device drivers). An operating system (OS) is on top of
+the lower layers. The OS provides all the standard functions and
+services of a multi-threaded environment that are needed by the
+layers above it. The SensorWare layer for instance, uses those
+functions and services offered by the OS to provide the run-time
+environment for the control scripts. The control scripts rely
+completely on the SensorWare layer while populating around the
+network. Static applications and services coexist with mobile
+scripts. They can use some of the functionality of SensorWare as
+well as standard functions and services of the OS. SensorWare is
+evaluated through: Memory size measurements, Delay measurements
+and Energy measurements and related tradeoffs.
+ 
+The main objective of the middleware integration platform
+\textit{Sensation} for WSN is to provide heterogeneity of between
+different sensor network infrastructures attributed to the variety
+of sensor, networking, or middleware technologies. Moreover, it is
+designed in order to provide a developer-friendly programming
+model that can further encourage the development of pervasive
+applications. Heterogeneity is provided through the abstraction
+layer. \textit{Senstation} has a high-level and intuitive
+programming model for context-aware pervasive applications.
+ 
+ 
+TinyDB \cite{molla2006survey} \cite{molla2006survey} is a query
+processing middleware system based on TinyOS. TinyDB provides
+power-efficient in-network query processing system for collecting
+data from individual sensor nodes which reduces number of messages
+that must be sent. This results in reduced energy consumption. It
+has two different types of messages for query processing â€“ Query
+Messages and Query Result Messages. It also has Command Messages
+for sending command to sensor nodes. While TinyDB provides nice
+abstraction support and has good aggregation model, it does not
+provide much functionality as part of middleware service. So most
+of the services have to be provided in the applications running on
+top of it.
+ 
+ 
+\subsection{Event based middlewares}
+ 
+\subsubsection{Publish/Subscribe oriented design middlewares}
+ 
+Publish/Subscribed oriented middleware contains a set of subscribers and a set
+of publishers. Subscribers can have access to publishers data streams through a
+common database and they register their interest for events or pattern of events
+and are subsequently asynchronously notified of events generated by publishers.
+It is possible to have multiple subscribers for a single publisher, and multiple
+publishers for a single subscriber \cite{eugster2003many},
+\cite{azzara2013middleware}.
+ 
+
+ 
+Middleware called \textit{PRISMA} is a resource-oriented publish/subscribe
+middleware for WSN. The main goals of \textit{PRISMA} are to provide: (i)
+programming abstraction through the use of REST interfaces, (ii) services,
+encompassing asynchronous communication, resource discovery and topology
+control, (iii) runtime support through the creation, configuration, and
+execution of new applications in WSN, and (iv) QoS mechanisms to meet
+applications constraints. In \cite{silva2014prisma}, the architecture of PRISMA,
+its implementation in the Arduino platform, and a preliminary evaluation are
+presented.
+ 
+Epidemic Messaging Middleware for Ad hoc networks (\textit{EMMA}) is an
+adaptation of Java Message Service (JMS) for mobile ad hoc environments which
+architecture is also based on publish/subscribe design \cite{musolesi2005emma}.
+ 
+ 
+\subsection{Service oriented Middlewares}
+
+Service-orientation is a design paradigm to develop software or applications in
+the form of services. Service-oriented computing (SOC) based on Service Oriented
+Architecture (SOA) approaches which traditionally used in corporate IT systems,
+are becoming applicable in the field of IoT due to its number of benefits
+including abstractions to wrap the heterogeneous functionalities of things
+within higher level services, service discovery and composition. In IoT
+infrastructures, composed of ultra large numbers of networked,
+resource-constrained devices, the discovery of services and adaptive composition
+of services is a substantial challenge. The service-oriented middleware (SOM)
+can tackle these challenges in IoT by supporting the service-oriented
+interaction pattern through the provision of appropriate functionalities for
+deploying, publishing/discovering and accessing services at runtime. SOM also
+provides support for adaptive service compositions in case of unavailable
+services.
+
+
+A large number of works have been published on SOMs in IoT. These works can be
+categorized as standalone service oriented middleware for
+IoT~\cite{Hydra08,SOCRADES10 , UbiSOAP12, Servilla12, WuKong1-13, MoboIoT14} and
+middleware services provided cloud computing's platform as a service
+(PaaS)~\cite{ Carriots, Xively,SicstheSense}. In the following, we summarize
+some key and recent works in each of these categories.
+
+\textit{Hydra}~\cite{Hydra08, Hydra09a}, which is currently known as
+LinkSmart~\cite{LinksmartHydra14} middleware, has been designed and developed to
+allow developers to build ambient intelligence services and systems through a
+SoA and model driven architecture approach. This middleware provides support for
+using devices as services both by embedding services in devices and by proxy
+services for devices. Its architecture contains a number of management
+components including service manager, event manager, device manager, storage
+manager, context manager, security manager, etc. – to that handles the various
+tasks needed by the middleware. These are grouped into application elements and
+device elements which are also consists of semantic layer, service layer,
+network layer and security layer. Use of semantic web services to device levels
+along with SoA in \textit{Hydra}, it can support syntactical as well as along
+with semantic level interoperability. Along with number of functional
+requirements (e.g. data management, event management, resource management) it
+also supports dynamic reconfiguration and self-configuration, which are key
+properties in any AmI application. With the support of resource manager, device
+manager, and policy manager Hydra suits in resource constrained devices or
+things. Distributed security and social trust components of the middleware
+offers secure and trustworthy communication within devices. To fulfil security
+and privacy goals it exploits virtualization and trust-worthy design and
+implementation of web-service based mechanisms, enriched by semantic
+resolution~\cite {HydraSecurity08}. Use of virtualization may introduce security
+concerns (e.g. side channel attack) if it supports multi-tenancy. Also, use of
+ontology based semantic security and interoperability solutions may not be
+viable in IoT. Due to lack of standard ontologies, dealing with ontologies in
+SoC is a challenging task and it will become worse in case of ultra-large scale
+IoT.
+
+ 
+ 
+\textit{SOCRADES} (Service-Oriented Cross-layer infRAstructure for Distributed
+smart Embedded devices)~\cite{SOCRADES08, SOCRADES10} middleware abstracts
+physical things as services using Devices Profile for Web Services (DPWS).
+Instead of starting from the scratch it relies two earlier works~\cite{
+SIRENA06,SODA06}. The main objective of \textit{SOCRADES} is to simplify the
+management of underlying devices or things for the enterprise applications (e.g.
+industrial automation).
+Its architecture consists of an application services (e.g. event storage) and a
+device services (e.g. device manager and monitor, service discovery, service
+lifecycle management) part. Different components of these two parts aim to
+fulfil different requirements of SOM. For instance, device services part's
+service discovery component, a key contribution of \textit{SOCRADES} middleware,
+discovers the services provided by the real-world devices or things while its
+device management and monitor component does the resource management (e.g.
+device access). It provides discovery on two levels, the device level and the
+service level, which can employ either standard WS-discovery (for Web Services)
+or a RESTful discovery mechanism (for RESTful services). Application services
+part provides event management and storage. Also, \textit{SOCRADES} middleware's
+Cross-layer Service Catalogue in between device and applications parts supports
+service composition that may not be fully dynamic, as composition relies on
+predefined building blocks. Role-based access control of devices communication
+to middleware and back end services and vice versa works as a security solution
+but limited to authentication only. Moreover, direct access to devices or their
+offered services through this middleware raises the risk of privacy violations.
+
+\textit{SenseWrap}~\cite{SenseWrap09} middleware combines the
+Zeroconf~\cite{Zeroconf} protocols with hardware abstraction using virtual
+sensors to offer a service-oriented and lightweight middleware for application
+developers. A virtual sensor provides transparent discovery of resources (mainly
+sensors) through the use of Zeroconf protocols. Applications can discover
+sensor-hosted services through Zeroconf. \textit{SenseWrap} also provides a
+standardized communication interface to hide the sensor-specific details from
+the applications. This interface relies on sensor modeling and custom wrappers
+(drivers) for each sensor model. Also, virtualization is limited to sensors not
+actuators or computing. These issues makes it unsuitable in IoT environments
+considering scale and heterogeneity in infrastructure and applications.
+
+\textit{MUSIC}~\cite{MUSIC09} middleware provides a self-adaptive
+component-based architectures to ease the building of systems in ubiquitous and
+SoA environments where numerous and unexpected changes may happen in context in
+different perspectives (e.g. service providers, service consumers). In
+particular, middleware work in this work focuses on changes in the service
+provider site in order to hook up interchangeably components and services
+providing the functionalities defined by the component framework. To support
+QoS-aware and context-based dynamic adaptation, \textit{MUSIC} middleware
+architecture comprises of components like context manager, QoS manager,
+adaptation manager, plan repository, SLA negotiator and monitoring, service
+discovery and these components provides different functionalities for the
+middleware. For instance, in planning-based adaptation, planning (available in
+plan repository) is typically triggered by context changes detected by context
+manager. With the support of these components, the dynamic adaptations work
+automatically to optimize the application utility in a given context. Context
+may contain a lot of private and sensitive data (e.g. location or interests of a
+user) and thereby increases the risk of privacy leakage.
+
+\textit{TinySOA}~\cite{TinySOA09} is a service-oriented architecture that offers
+a high-level abstraction for the development of WSN applications. It provides a
+simple service oriented API through which application developers can access WSN
+resources from their applications. Along with hiding the low-level technical
+details of the WSN hardware and communication for the application developers, it
+easily integrate Internet applications with WSN and allow them to collect
+information from the sensors. TinySOA employs simple and deterministic
+mechanisms for WSN resource (e.g. sensors node) registration and discovery. It
+uses a gateway component to bridge between a WSN and external applications and
+web services to allow applications to access WSN. Other than few basic
+functional requirements (e.g. abstraction, resource discovery and management) it
+does not consider non-functional requirements.
+
+\textit{SensorsMW}~\cite{SensorMW10} is an adaptable and flexible SOM for QoS
+configuration and management of WSN. It abstract WSNs as a collection of
+services for seamless integration into enterprise information systems, where
+applications can gather sensed information using web services and easily
+configure to efficiently collect information from WSN. WSN resources are managed
+for guaranteeing certain QoS according SLAs. Importantly, it offers applications
+to reconfigure and maintain the network during its lifetime. In this context,
+high-level applications are require to control and trade-off between the
+conflicting issues (e.g. lifetime and sampling rate). To achieve this, WSN
+resources (nodes) need to be accessed to change their configurations to fit with
+the applications requirements which \textit{SensorsMW} provides an abstract way
+for the high-level applications. Resource reconfiguration and management needs
+resource discovery, especially in mobile IoT where resources are dynamic, is not
+addressed here. Also, in critical applications this reconfiguration may fail as
+their strict QoS requirements may not allow any trade-off amongst necessary
+resources.
+
+
+\textit{SENSEI}~\cite{SENSEI10} middleware aims to develop an architecture for
+the future and real world Internet including IoT. It is one of the earliest work
+that includes the context model, context services, actuation tasks and dynamic
+service composition of both primitive and advanced services for real world
+Internet. Main component of this middleware is the resource layer that is
+sandwiched between application layer and communication services layer. The
+resource layer contains all necessary functions that facilitate the interaction
+of applications and services with the resources. The resource component of the
+resource layer provides a unifying abstraction for simple devices (e.g. sensors,
+actuators, processors or software components). Support services component
+enables discovery, composition and dynamic composition of resources (e.g.
+services) and support long term interactions. The dynamic composition and
+instantiation of new services are facilitated by the semantically-rich models
+and descriptions of sensors, actuators and processing elements. The resource
+layer also contains functions for privacy and security (e.g. authentication).
+Similar to \textit{Hydra}~\cite{Hydra08, Hydra09a}, due to lack of standard
+ontologies (e.g. context modeling, semantic modeling, and domain knowledge),
+\textit{SENSEI} will struggle in IoT because of its ultra-large scale
+infrastructure and diverse applications.
+
+
+
+The~\textit{ubiSOAP}~\cite{UbiSOAP12} is a service-oriented middleware to
+provide seamless networking of web services that may be deployed on various
+devices including mobile devices. Its architecture consists of a multi-radio
+networking layer and a web services (WS) oriented communication layer. The
+multi-radio networking layer manages heterogeneous network resources using a
+network-agnostic addressing scheme and offers network-agnostic connectivity to
+services. This layer also offers the functionality for the QoS-aware (e.g.
+energy consumption, availability) network selection. The WS-oriented
+communication layer offers point-to-point (P2P) communication that supports
+legacy WS and thus transparently bring the added value of today's ubiquitous
+networking environments to existing services. Ubiquitous service discovery
+(ubiSD-S) layer on top of UbiSOAP provides dynamic, interoperable, context-aware
+service discovery. In general, UbiSOAP is a lightweight SOM that offers resource
+management (e.g. device and network management) and network level
+interoperability by supporting heterogeneous networking device and technologies.
+Lack of context-awareness in~\textit{ubiSOAP} can be an issue, as it is key in
+adaptive and autonomous behavior of the things. It may also suffer due to lack
+of security and privacy solutions at the middleware level.
+
+
+\textit{Servilla}~\cite{Servilla12} is a middleware that facilitates application
+development in heterogeneous WSNs by exploiting SOC to decouple
+platform-specific code from platform-independent applications. It structures
+applications as platform-independent tasks that are dynamically bound to
+platform-specific services. \textit{Servilla's} architecture consists of a
+virtual machine (VM) and a service provisioning framework (SPF) and runs on
+individual sensor nodes in a WSN. The VM executes application tasks while the
+SPF consists of a consumer (SPF-consumer) that discovers and accesses services,
+and provider (SPF-provider) that advertises and executes services. A VM is used
+abstract heterogeneity in instruction sets of WSN devices and to compile tasks
+using the VM's uniform and platform-independent instruction set. The VM also
+offers the dynamic deployment and mobility of tasks with the support of dynamic
+service binding and the novel binding semantics. \textit{Servilla's} components
+including code manager, service management (e.g. service binding, service
+finder) along with native implementation offer energy and memory efficiencies. A
+specialized service description language facilitates flexible matching between
+applications and services residing same or different devices, but this
+specialized language requirements could limit the wide spread adoption of this
+middleware in IoT. Moreover, individual sensor level access in this middleware
+could introduce privacy violations and security threats.
+
+
+\textit{KASOM}~\cite{ KASOM12} is a Knowledge-Aware and Service-Oriented
+Middleware (KASOM) for pervasive embedded networks, especially for WSANs
+(Wireless Sensor and Actuator Networks). Its architecture consists of three
+major subsystems: framework services (e.g. security, runtime manager),
+communication services (e.g. resource monitor), and knowledge management
+services (e.g. service composition rules, context resources). These services
+allow addressing a SOA for pervasive environments using registration, discovery,
+composition, and orchestration of services. Most of these services are
+established on complex reasoning mechanisms and protocols based on the WSAN's
+contextual model, which represents a semantic description of low and high level
+resources of the WSAN. All these services provide a number of tools for the
+developers to facilitate the design and deployment of services in pervasive
+network. Real life implementation of it in hospital and health management shows
+the potential of KASOM in terms of response time, efficiency and reliability.
+However, due to in-network agents provided predefine service composition rules,
+it will fail to provide dynamic service composition in mobile and resource
+constrained IoT infrastructures. Moreover, proposed security solution in KASOM
+by access control is limited to authentication only.
+\textit{CHOReOS}~\cite{CHOReOS12, CHOReOS13} is SOM that enables large scale
+choreographies or compositions of adaptable, QoS-aware and heterogeneous
+services in the Future Internet like environment including IoT. It addresses the
+scalability, interoperability, mobility, and adaptability issues of the Future
+Internet through novel approaches like scalable probabilistic thing-based
+service registries and discoveries~\cite{MoboIoT11,MoboIoT14}. The CHOReOS is
+composed of four components: eXecutable Service Composition (XSC) to coordinate
+the composition of services and things, eXtensible Service Access (XSA) to
+offers mechanisms to access services and things, eXtensible Service Discovery
+(XSD) to manage protocols and processes for discovery of services and things,
+and the Cloud and Grid middleware to manage computational resources and drives
+the deployment of choreographies.\textit{MobIoT}, a key component of CHOReOS
+middleware, is presented separately in~\cite{MoboIoT11,MoboIoT14} as a
+thing-based SOM for the Mobile IoT. Unlike most existing SOMs~\cite{ KASOM12,
+UbiSOAP12}, its thing-based probabilistic service discovery and registration and
+look-up protocols and algorithms scales well in dynamic mobile IoT. Moreover,
+semantic thing-based service composition and the algorithms allow
+\textit{MobIoT} and \textit{CHOReOS} to execute automatically, with no
+involvement from developers or end-users which is highly desirable in IoT,
+especially in M2M communications. Considering the heterogeneity and lack of
+standard in ontologies, ontology based semantic support for application
+development and service composition in diverse applications and heterogeneous
+infrastructures of IoT is a very challenging task.
+
+\textit{MOSDEN} –Mobile Sensor Data Processing Engine~\cite{MOSDEN14} is a
+middleware to support sensing as a service model~\cite{SensingService14}. It is
+built on top of GSN- an existing cloud assisted middleware~\cite{GSN06}. Using
+plugin architecture it improves the scalability and user friendliness (e.g. easy
+to use) of the solution, considering that plugins for heterogeneous devices can
+be built by anyone and available in easily accessible places (e.g. Google play).
+\textit{MOSDEN} added a plugin manager and a plugin layer in GSN to support and
+manipulate plugins. It also eliminated sensor dependent individual wrapper from
+GSN by a single generic wrapper to handle the communication. As it relies on
+GSN, like GSN it will suffer in IoT in terms of resource/service discovery and
+service composition. GSN employs traditional discovery
+approaches~\cite{ServiceDiscovery08} and predefined composition rules available
+in virtual sensors that may not work in IoT's dynamic and ultra large networks.
+
+
+
+Along with the aforementioned standalone SOM proposals, a large number of cloud
+based IoT platforms are commercially available~\cite{CloudIoT1}. To provide an
+impression of the field in the following we summarize few of these and for
+others, readers are referred to~\cite{CloudIoT1} and references therein.
+
+\textit{Xively}~\cite{Xively} is a PaaS that provides middleware services to
+create exciting products and solutions on the IoT. Public cloud based
+\textit{Xively} offers developers standards-based directory services, data
+services and business services.
+Directory services help to find appropriate object with appropriate permission.
+Data management services along with high performance and time-series database
+allows to store and retrieve easily and reliably. Its web-based tools simplify
+the data or control with other applications complexities of IoT development.
+Business services includes device lifecycle management service including device
+provisioning.  Device lifecycle management along with real-time message bus in
+\textit{Xively} provides large scale and real-time deployments in IoT.
+Importantly, \textit{Xively} provides end to end security over the entire
+platform to ensure IoT solution integrity. \textit{Xively} services are free of
+charge for developers but it offers a limited amount of API calls per minute.
+Lack of storage security or data at rest and trust~\cite{IoTCloudConcerns15} can
+be an issue in IoT applications. It supports multiple data formats for input and
+output, like XML, JSON, CSV and EEML. However, it doesn't homogenize the
+incoming data. Also, it supports a list of software and hardware combinations
+needed to develop IoT applications but its interoperability is limited within
+this list.
+ 
+ 
+\textit{CarrIoT}~\cite{ Carriots} is a cloud service oriented middleware for
+IoT, especially for M2M communications with three main focus: (i) simple, fast
+and cost effective M2M application development, (ii) scalability and (iii) easy
+to use. It has rich set of APIs and powerful SDK. Great advantage of
+\textit{CarrIoT} is that it supports immediate scalability, which enables the
+project growing and multiply the number of devices. Users can, for example, put
+triggers on various stages of the data processing cycle, from receiving the data
+to persisting it into the database. Triggers and other actions can be easily
+configured in the provided Web GUI\cite{puhringercloud}.
+However, \textit{CarrIoT} are not free. There is a free starting plan which lets
+you manage up to 10 devices but if you need more than that you will have to pay.
+Another aspect to take into account is that the users can't share their data
+publicly. Also, just like Xively's platform, they don't standardize the incoming
+data and does not guarantee storage security, and offers limited
+interoperability~\cite{IoTCloudConcerns15}.
+
+
+ 
+\textit{Echelon}~\cite{ Echelon} is an IIoT platform with a full suite of chips,
+stacks, modules, interfaces and management software for developing devices,
+peer-to-peer communities and applications delivered via the IzoT Device Stack,
+IzoT server stack and FT 6000 EVK. Unlike consumer IoT platforms it addresses
+the core requirements for the IIoT, including autonomous control,
+industrial-strength reliability, support for legacy evolution and exceptional
+security. Similar to Xively, \textit{CarrIoT} and other many cloud platforms,
+its interoperability is limited within Echelon's and list of other hardware.
+Being private cloud, its security is better than Xively, but trust still is an
+issue for sensitive IIoT applications.
+
+Aforementioned works are not the exhaustive list of available SOMs in IoT.
+Considering the space limitation, we have covered a number of recent (from 2009)
+representative works to present the stat-of-the-art in this particular category
+of IoT middleware. Also, we did not explicitly few works which have been
+extended by the presented works. For instance, we have not included middlewares
+in~\cite{SIRENA06,SODA06} as they have been extended in~\textit{SOCRADES}. A
+number of service oriented middlewares, especially designed for WSNs are available in
+~\cite{ Carisma03, SI2-06, OASiS06, MidCASE07, SensorWeb2.0, Sstreamware08,
+SOAMenuF08, USEME08, DySSCo08, SATWare09, MiSense09,B-VIS09, WhereX10, SOMWSN10,
+SOMM11}. Most of these works are summarized in~\cite{SOMWSNs11}. For the detail,
+readers are referred to~\cite{SOMWSNs11} and references therein. These work
+support one or more of the IoT middleware requirements but not all identified
+earlier.
+
+
+ 
+As SOC by nature support abstraction and do not explicitly deals with code,
+existing SOMs do not explicitly consider abstraction and code management. The
+majority of the existing service oriented middlewares are WSNs centric and their
+scale is limited to WSNs scale, which is typically in the range of thousands,
+much less than the ultra-large scale (billions) of IoT. Importantly, most of
+these middlewares' resource discovery and management, predefined and
+deterministic composition mechanisms will not scale well in ultra-large and
+dynamic IoT environments. Lack of global and standard ontologies, semantic
+interoperability of the existing SOMs will not suit well in IoT. Most existing
+standalone SOMs, which are considering security, are offering limited scale
+security by supporting authentication not integration and availability. On the
+other hand, cloud platform supported middlewares struggles in storage security
+and trust.
+
+
+ 
+ 
+%Other examples are Mires, Corba...
+ 
+ 
+ 
+ 
+\subsection{Virtual machine oriented design}
+ 
+Virtual machine (VM) oriented design provides virtualisation of real hardware,
+intermediate program representation or bytecode interpretation
+\cite{azzara2013middleware}. Virtual machine oriented middleware placed between
+the operating system and applications is one type of VM design SOFTWARE. Another
+group is system level VMs that fully replace the operating system, often
+providing advanced functionality such as concurrent programming support. By
+using virtual machines the same application runs transparently in any platform
+supporting the interpreter. One of the problems related to VM oriented design is
+related to the lack of resources in WSN nodes. Another disadvantage of this
+approach is that virtual machine becomes oriented to special types of
+application, thus reducing flexibility and the possibility of re-tasking.
+ 
+The agent-based middleware for social networking services (SNS)
+(\textit{MAgNet}) \cite{basuga2009magnet} is a proof-of-concept
+prototype that enables SNSs for users in mobile network domain.
+Services provided by the MAgNet middleware can be roughly divided
+into two groups: creating and managing groups of users and
+planning group events. Current set of implemented services is used
+as the MAgNet proof-of-concept prototype but it possible to extend
+the middleware for provisioning more SNSs.  A social network is a
+structure comprising of nodes connected to each other by using
+various criteria. It is described as a graph $G = (V, E)$. The
+nodes (i.e., vertices $V$) represent people or organisations
+connected through various criteria while the edges in the graph
+($E$) represent those connections. A software agent is a computer
+program that autonomously acts on behalf of its user. The most
+important property of an agent is its autonomy, meaning that the
+agent can act without direct intervention from its user and has
+control over its own actions and internal state. The architecture
+of the proposed MAgNet middleware is designed as a MAS system
+which contains three types of software agents: Graphical User
+Interface Agent (GA), User Agent (UA) and Social Agent (SA). The
+UA and its accompanying GA are assigned to a single user. The UA
+is designed to represent the user within the MAgNet middleware.
+The GA provides an interface between the user and his/her UA: it
+basically enables the user to access all of middleware
+functionalities and communicate with other users by presenting all
+relevant information and personal messages to the user via
+graphical interface. And the SA provides the support and
+coordination needed for providing SNSs within the developed MAgNet
+middleware. The \textit{MAgNet} middleware was developed using
+Java Agent DEvelopment framework (JADE)5, a framework for
+developing agents and MASs in compliance with Foundation for
+Intelligent Physical Agents (FIPA)6 standards. All agents within
+the middleware communicate by exchanging Agent Communication
+Language (ACL) messages. Each ACL message, besides carrying
+information for the receiving agent, has a type that defines its
+function (e.g., inform, request, cancel, reject or accept). In
+addition to message types, each message can be assigned with a
+conversation identifier (CID). The CID facilitates the detection
+and filtering of incoming ACL messages. Filtering ACL messages
+based on their CID and message type simplifies the communication
+between agents. Each agent has a number of tasks. Every task is
+implemented as agent?s behaviour, which is basically a Java class.
+Adding behaviour to the agent tells an agent to execute the task
+which the behaviour represents. Since multi-threads are supported
+in Java, an agent can execute several behaviours concurrently.
+This allows having a single Java thread per agent which is
+especially useful in environments with limited resources such as
+mobile phones.
+ 
+ 
+\textit{Mate} \cite{hadim2006middleware} is a middleware for WSN
+which uses a virtual machine approach as an abstraction layer to
+implement its operation and tackle the challenges. The general
+idea of \textit{Mate} is to provide new programming paradigms to
+overcome constraints such as limited bandwidth and network
+activities' large energy draw. \textit{Mate} proposes a spectrum
+of reprogrammability, from adjusting simple parameters to
+uploading complete program updates using a virtual machine.
+Sending a single bit of data can consume the same energy as
+executing thousands of instructions to produce that bit of data.
+\textit{Mate} is a byte code interpreter that runs on TinyOS. Mate
+uses codes broken into capsules of 24 byte-long instructions. This
+benefits large programs, which are made up of multiple capsules
+and, thus, easily injected into the network. Mate's key components
+are the VM, the network, the logger, the hardware, and the
+boot/scheduler. Using a synchronous model that begins execution in
+response to an event such as a packet transmission or a time out,
+Mate avoids message buffering and large storage. The synchronous
+model makes application- level programming simpler and far less
+prone to bugs than dealing with asynchronous event notifications.
+Another Mate functionality is infection or network updates
+achieved by adding a version number to the capsule. So, comparison
+takes place at the neighbors, followed by installation of the new
+version. This process cascades with hop-to-hop communication.
+ 
+\textit{Muse} is VM based middleware for using sensors
+effectively. MUSE is a middleware-architecture to support the
+development of contextual real-time applications and services for
+sensor-equipped smart environments. MUSE, like the
+TUIpist-Framework, uses Jini infrastructure technology as service
+platform. The sensor service in MUSE is organized similarly to the
+sensor components of TUIpist; the fusion service provides similar
+functionality like the ApplicationMediator in the
+TUIpist-framework. \textit{Muse} has the problem with scalability
+and does not offer an opportunity for persistent data storage e.g.
+for later evaluation.
+ 
+\textit{SwissQM} (Scalable WIreleS Sensor network Query Machine)
+\cite{mueller2007swissqm} sis virtual machine middleware for WSN
+built to address lack of data independence and poor integration
+with the higher layers of data processing chain. \textit{SwissQM}
+combines a virtual machine at the sensors with a powerful gateway
+as access point to the system. The flexibility of \textit{SwissQM}
+opens up the doors to sensor networks with richer functionality,
+data model independence, optimised performance, and smooth
+integration into the rest of the architecture. SwissQM supports
+adaptability (e.g., push down strategies), multiple users and
+applications, high query turn-around, extensibility (e.g., user
+defined functionality), and optimised use of resources. SwissQM is
+based on a specialised virtual machine that runs optimised byte
+code rather than queries. As a result, SwissQM does not make any
+assumptions about the query language used (e.g., SQL or XQuery),
+about the deployment strategy of the underlying sensor network
+(e.g., one single network or multiple networks), and can easily
+provide highly efficient multi-user support. SwissQM has been
+designed with several requirements in mind: separation of sensors
+and external interface; dynamic, multi-user, multi-programming
+environment; optimised use of the sensors; and extensibility.
+SwissQM should not implement any particular query language. The
+programming model should be independent of the query lan- guage
+used. It must also be dynamically adaptable. As a result, the
+sensor nodes should not contain application specific functionality
+(e.g., the ability to parse SQL or join operators). Such
+functionality is treated as a dynamically deployable extension.
+SwissQM should not impose restrictions on the query submission and
+change rate, nor in the number of queries that can be run
+concurrently (beyond the inherent limitations of the underlying
+hardware). The only processing at the sensor nodes should be that
+related to capturing, aggregating, and forwarding data. Anything
+else should be there only because it has been pushed down from
+above. This increases the memory available for data and leaves
+room for more queries and/or more sophisticated processing such as
+event generation or user defined functions. SwissQM should be
+programmable to include the ability to implement user defined
+functions and the ability to push down functionality from higher
+data process- ing layers. Extensibility also refers to SwissQM
+itself: It should be possible to dynamically extend and modify the
+behaviour of SwissQM as needed.
+ 
+%The \textit{Squawk} Java Virtual Machine is the result of an effort to write a J2ME CLDC compliant JVM in Java that provides OS level mechanisms for small devices, easing porting %and debugging of the VM. The obser- vation was that most JVMs are written in the C and C++ languages, even though complex processes performed by the JVM can be bet-
+ 
+ 
+ 
+% \subsection{Hybrid oriented design}
+ 
+\subsection{Tuple based}
+ 
+LIME (Linda in a mobile environment) \cite{murphy2001lime} is the middleware for
+mobile networks developed like a response to the software engineering challenge
+posed by the advent of mobility. LIME borrows and adapts the coordination model
+made popular by Linda \cite{gelernter1985generative}. In Linda, processes
+communicate through a shared tuple space that acts as a repository of elementary
+data structures, or tuples. It is agent-based and application-driven middleware.
+Throught its \textit{Strong and Weak Reactions}, LIME can handle high-priority
+or low-priority jobs. One of the most important characteristics of LIME is the
+class \textit{LimeTupleSpace} which stands for the shared tuple space.
+In the implementation of LIME, presented in \cite{murphy2006lime}, agents are
+single-threaded and only the thread of the agent that creates the tuple space is
+allowed to perform operations on the \textit{LimeTupleSpace} object; accesses by
+other threads fail by returning an exception. Initially, all tuple spaces are
+created as private, and are becoming shared by enabling the instance
+\textit{setShared}.
+LIME can achieve only partial context-awareness, since it doesn't have awareness
+of the system configuration.
+ 
+ 
+\textit{UbiROAD} is semantic middleware for context-aware smart road
+environments \cite{terziyan2010ubiroad}.
+Its purpose is to deal with the interoperability between the in-car and roadside
+devices produced and programmed by different providers. Interoperability is
+ensured by two layers: data-level interoperability and functional protocol-level
+interoperability and coordination. With respect to interpretability challenge,
+UbiRoad needs to deal with three problems: technical interoperability, semantic
+interoperability and pragmatic interoperability. With regards to the technical
+interoperability, it means that it should be capable to interoperate devices,
+protocols and other technical standards.
+Semantic interoperability means being capable of various system components to
+treat and interpret exchanged data and information identically and share a
+common understanding of it. Pragmatic interoperability means being capable make
+system components to capture willingness of partners to collaborate or, more
+generally, to capture their intent. UbiROAD is on top of the future smart
+traffic environments but also between the smart road device layer and the future
+service oriented architectures. Heterogeneity with respect to the nature of
+components, standards, data formats, protocols, etc. can create significant
+obstacles for interoperability among the components of ubiquitous systems.
+UbiRoad is designed to easily deal with this issue. Another major issue of
+UbiROAD is to guarantee high level of safety. It is self-adaptive by deploying
+distributed agents. General idea of this middleware is to ensure
+context-awareness, adoptable and reconfigurable composition.
+It is achieved by customization, personalization, added value, dynamicity and
+autonomy of services. Autonomous management is achieved by autonomous trust
+management via semantic annotation. Semantic concepts are interpreted using
+trust ontologies.
+ 
+\textit{TeenyLIME} \cite{costa2006teenylime} is part of a broader
+vision concerning the application of tuple spaces to mobile and
+wireless sensor networks. It is a middleware for sensor networks
+based on the tuple space model made popular by Linda.
+\textit{TeenyLIME} is mostly based on the LIME middleware
+developed for mobile ad hoc networks (MANETs). Like LIME,
+\textit{TeenyLIME} operates by distributing the tuple space among
+the devices, transiently sharing the tuple spaces contents as
+connectivity allows, and introducing reactive operations that fire
+when data matching a template appears in the tuple space. One
+significant design decision in \textit{TeenyLIME} is to restrict
+transient sharing only to the tuple spaces of one-hop neighbors.
+This choice is not only energy-conscious, but is also in line with
+similar research efforts in the field. \textit{TeenyLIME} can
+enable a number of application-level uses thanks to the control of
+the one-hop neighborhood around device, augmented with the
+powerful and expressive primitives. A version of
+\textit{TeenyLIME} for TinyOS is designed and implemented. The
+application programming interface (API) id designed for the nesC
+language. In addition to providing the usual Linda primitives and
+those added by LIME, \textit{TeenyLIME}  API provides features
+introduced explicitly to address the specific requirements of
+WSNs. From the architectural point of view, \textit{TeenyLIME}
+consists of three TinyOS components wired together in the
+configuration. First component is the \textit{TupleSpaceM} that is
+invented to delegate the actual operation to one of the two other
+components: the \textit{LocalTeenyLIME} or the
+\textit{DistributedTeenyLIME} components. The
+\textit{LocalTeenyLIME} component stores the tuples output to the
+local tuple space, and performs the actual matching process for
+query operations. The \textit{DistributedTeenyLIME} component is
+in charge of implementing the operations whose scope is different
+from the local device.
+ 
+\textit{TinyLime} \cite{curino2005mobile} is middleware for WSN,
+which is build no the background of \textit{LIME} and
+\textit{LINDA} middlewares. Apart from the transiently shared
+tuple space used as a storage for sensed data (that is introduces
+already in \textit{LINDA}), \textit{TinyLime} also posses a
+component n addition to agents and hosts the motes. Motes are
+scattered around and communicate with base stations only when the
+latter move within range. A mote is not visible through TinyLime
+unless it is connected to some base station. When this is the
+case, the mote is represented in the model much like any other
+agent residing on the base station host (and therefore ?connected?
+to it), with its ITS containing the set of data provided by its
+sensors. Data aggregation within \textit{TinyLime} can be gathered
+in two different levels: globally, over the values sensed by
+multiple sensors, or locally, over the values sensed by a single
+sensor. A sensor can be preprogrammed to take samples at regular
+intervals throughout its lifetime. Alternately, it can start in
+passive mode, and it is up to the application programmer to
+explicitly activate sampling for a given number of epochs, after
+which the sensor automatically switches itself back into passive
+mode, without additional communication. On standard hosts,
+\textit{TinyLime} is implemented as a layer on top of
+\textit{Lime} without requiring any modification to it,
+reasserting the versatility of the Lime model and middleware. Main
+architectural components of \textit{TinyLime} are
+\textit{MoteLimeTupleSpace}, \textit{MoteLimeTuple} and
+\textit{MoteLimeTemplate}.
+ 
+ 
+\textit{TS-Mid} \cite{de2008ts} is another tuple space based
+middleware for WSN and it threats with disconnections naturally by
+providing an asynchronous and decoupled communication style on
+both time and space, i.e., providers and receptors do not need to
+be available in the same instant. \textit{TS-Mid} adopts the
+JavaSpaces specification, including operations to write, read and
+take entries, together a mechanism for events notification in the
+tuple space and the creation of replicated JavaSpaces service in
+the WSN. Each logical region is viewed as a distributed tuple
+space, where parts of the tuple space are physically located in
+each sensor node. In practical terms, after defining which sensors
+nodes belong to each logical region, the sink node may transmit
+requisitions to client application for logical region leader node.
+The leader node is responsible for directing the requests of
+execution of operations on the tuple space to other members of
+region, collecting members reply, computing and transmitting
+results back to the sink node. Data transmission is always
+accomplished through tuples on the one-hop routing algorithms.
+\textit{TS-Mid} has been implemented atop of TinyOS. From the
+architectural point of view, \textit{TS-Mid} consists of three
+main nesC modules, namely LRTSpaceM, AggregateM and TSpaceM. These
+components are wired together in the configuration LRTSpace.
+Module called LRTSpaceM implements the operations of interface
+TSpace related to creation of logical regions and additionally, it
+stores information about these regions in a list. Module TSpaceM
+is responsible for implementing the operations defined in
+interface TSpace related to the access to local tuple space of
+each sensor node belonging to logical region. This component
+stores entries (tuples) in local tuple space and executes the
+matching process for reading operations. Module AggregateM
+provides the interface Aggregate. This interface defines
+operations to use the data aggregate service of the logical region
+according to the criteria established in the reading operations.
+The communication between Java applications and the sink node
+(through a serial port) is provided by the GenericComm module of
+TinyOS. Modules LRTSpaceM and TSpaceM use the module PacketHandler
+that provides Send and Receiver interfaces to send and receive
+messages, respectively.
+ 
+ 
+\subsection{Application driven}
+ 
+% Middlewares:  AutoSec, MiLAN, Adaptive Middleware, MidFusion
+The aim of application driven approach is to provide a better resource management (i.e., QoS support)
+compared to other variants by implementing an architecture which reaches the network protocol stack.
+This offers the possibility to fine-tune the network based on the application requirements. However, this
+approach lacks in support for platform (e.g., operating systems and hardware) heterogeneity
+because of the tight coupling between applications and middleware layer that creates only
+specialized middleware solutions\cite{hadim2006middleware}.
+ 
+% AutoSec
+An example of application driven middleware is AutoSec (Automatic Service Composition)\cite{han2001autosec},
+which uses dynamic service brokering for resource management in a distributed system. This is done by appropriate
+combination of information collection and resource provisioning policies based on current system conditions and
+application requirements.
+ 
+% Adaptive Middleware
+Another example is Adaptive Middleware\cite{huebscher2004AdapMid} which explores the commitment between
+resource spending and quality during information collecting. The main goal is to decrease the transmissions among
+sensor nodes without compromising the overall result.
+ 
+% MILAN
+MiLAN (Middleware Linking Application and Networks)\cite{milan2004middleware} is also similar to Adaptive Middleware scheme.
+However, MiLAN allows applications to specify their QoS requirements and adjust the network characteristics to increase
+application's runtime while still meeting those requirements. The adjustments are made based on information collected
+from the application, the user, the network and the overall system. The application provides the QoS requirements
+over time and how to satisfy these using a combination of sensors. The overall system and the user then decide upon the
+importance of different applications, while the network provides information the available resources.
+Both Adaptive Middleware and MiLAN require knowledge about the exact sensors.
+In dynamic and pervasive computing environments, the number and types of sensors available to the
+applications may vary. It is impractical to include knowledge about all the different sensor nodes that
+an application can potentially make use of. Moreover, all these sensors come at various levels of cost
+and benefit to the application.
+ 
+% MidFusion
+MidFusion\cite{alex2008midfusion} builds on the concepts presented in MiLAN and Adaptive Middleware and
+aims to avoid having knowledge about the exact sensors available by using principles of Bayesian and Decision
+theory to provide a portable abstraction to application. In addition to MiLAN and Adaptive Middleware,
+MidFusion is using the information aquisition cost to select the best set of sensors or sensor agents.
+ 
+\begin{table*}[h!]
+ \caption{Summary of the IoT middlewares in terms of supported functional
+ requirements}
+\label{tab1}
+ \centering
+{\scriptsize \begin{tabular}{ |l|l|l|l|l|l|} \cline{1-6}
+\multicolumn{6}{|c|}{Functional requirements}\\
+\hline
+&Resourse Discovery & Resource Management & Data Management & Event Management & Code Management \\
+\hline
+%\multicolumn{6}{|c|}{Event-based (Publish/Subscribe)}\\
+\multicolumn{6}{|c|}{Event-based}\\
+\hline
+Prisma  & DD& RM& DPDA& SN & CA\\
+\hline
+Emma &DD&RM & DA & NS& CA\\
+\hline
+Hermes &DD & NI & DPDF & LN& NS\\
+\hline
+Green &DD, LB& RM& DS, DPDF & LN& CM\\
+\hline
+%\multicolumn{6}{|c|}{Event-based (Message-oriented)}\\
+%\hline
+Mires & DD & NS& DPDA& LN& NS\\
+\hline
+SensorBus & DD &  NS& DPDA& LN& CA\\
+\hline
+%MQSeries & N/A &  N/A& Fully& Partially& Partially\\
+%\hline
+
+%%%% Raz
+\multicolumn{6}{|c|}{Service-oriented}\\
+\hline
+Hydra & DD,DeD, SD & RA, RM, RCP & DS & SS & NS\\
+\hline
+SOCRADES~\cite{SOCRADES10} & DD,DeD, SD  & RA, RM, RCP & NI & LS & NS \\
+\hline
+SenseWrap~\cite{SenseWrap09} & DD, DeD, SD  & NI & NI & SS & NS \\
+\hline
+SENSEI~\cite{SENSEI10} & DD, DeD  & RM, RA, RCA & DS,DPA & NI & NS \\
+UbiSOAP & Yes & Yes& Yes& Partially& Partially \\
+\hline
+Xively  & Yes & Yes & Partially & Partially & Partially\\
+\hline
+%&Resourse Discovery & Resource Management & Data Management & Event Management & Code Management \\
+CarrIoT & Yes & Yes & Partially & Fully & Fully\\
+\hline
+SicsthSense & N/A & N/A & Yes &Partially & Partially \\
+
+
+\hline
+%% 
+
+\multicolumn{6}{|c|}{Component based}\\
+\hline
+\multicolumn{6}{|c|}{Agent-based}\\
+\hline
+ActorNet & Yes & Yes & Fully & N/A& Fully\\
+\hline
+Agilla & Yes & Yes & Fully & N/A& Fully\\
+\hline
+AFME & Yes & Yes & Fully & N/A& Doesn't support\\
+\hline
+Impala & Yes & Yes & Fully & N/A& Fully\\
+\hline
+Maps & Yes & Yes & Fully & N/A& Doesn't support\\
+\hline
+Maspot & Yes & Yes & Fully & N/A& Fully\\
+\hline
+Smart Messages Project & Yes & Yes & Fully & N/A& Fully\\
+\hline
+TinyMAPS & Yes & Yes & Fully & N/A& Fully\\
+\hline
+\multicolumn{6}{|c|}{Tuple space approach}\\
+%&Resourse Discovery & Resource Management & Data Management & Event Management & Code Management \\
+\hline
+LIME & DD &NS&  DS& NI& CM\\
+\hline
+UbiROAD & CD& RM& DS & NS& NS\\
+\hline
+TeenyLIME & DD & RM&  DPDA, DS& LN&CM \\
+\hline
+TinyLime & CD& NS& DPDA& NS&CM\\
+\hline
+TS-Mid & DD & RM & DPDA& NS&NS\\
+\hline
+\multicolumn{6}{|c|}{Virtual machine approach}\\
+ \hline
+%&Resourse Discovery & Resource Management & Data Management & Event Management & Code Management \\
+MAgNet & Yes& Yes &Doesn't support & No& Partially\\
+ \hline
+Mate &Yes &  Yes& Doesn't support & Yes& Partially\\
+ \hline
+Muse &Yes &  Yes& Doesn't support & No& Partially\\
+ \hline
+SwissQM  &Yes &  Yes& Doesn't support & No& Partially\\
+ \hline
+\multicolumn{6}{|c|}{Database approach}\\
+\hline
+SINA & NS & RM & DPDA & NS & NS\\
+\hline
+IrisNet & DD,LB & RA & DPDA, DPDF  & NS & CM \\
+\hline
+HyCache & DD & RM & DS  & NS & NS \\
+\hline
+GSN & DD & RA & DS, DPDF & LN & CA\\
+\hline
+KSpot\textsuperscript{+} & LB, DD & RM & DPDA & NS & NS\\
+\hline
+Cougar & DD & RM & DS & NS & NS \\
+\hline
+DsWare & NI & NI& DS & LN& DA\\
+%\hline
+%SensorWare & No & No & Fully& Yes & Fully\\
+\hline
+Sensation & NI & NI & DS& NS& CM\\
+\hline
+TinyDB & DD& NI& NS& DPDA&  NI \\
+\hline
+\multicolumn{6}{|c|}{Application driven approach}\\
+\hline
+Milan & Partially & Yes & Partially & N/A & N/A\\
+\hline
+MidFusion & Partially & Yes & Partially & N/A & N/A\\
+\hline
+Adaptive Middleware & Partially & Yes & Partially & N/A & N/A\\
+\hline
+AutoSec & Partially & Yes & Partially & N/A & N/A\\
+\hline
+%\hline
+%\rowfont{\tiny}
+ \multirow{2}{*}{\textbf{Legend}}  & Centralised Discovery (CD) & Resource Allocation
+ (RA) & Data storage (DS)& Supported  & Code Migration (CM) \\
+%\hline
+%\rowfont{\tiny}
+ & Distributed Discovery (DD) & Resource Monitor (RM) & Data Preprocessing
+ (DP)
+ &\hspace{1mm}-Large Scale (LS) & Code Allocation (CA) \\
+%\hline
+ & Device Discovery (DeD) & Resource Composition (RC) & \hspace{1mm}-Aggregation
+ (A) &\hspace{1mm}-Small Scale (SS)& \\
+
+  No Information (NI)& Network Discovery (ND)    & \hspace{1mm}-Adaptive (A)& 
+  \hspace{1mm}-Compression(C) & &  \\
+
+Not supported (NS)&Service Discovery (SD) & \hspace{1mm}-Predefined (P) & \hspace{1mm}-Filtering (F) &                        &\\
+& & Resource Conflict (RCL) &  &                       
+&\\
+
+\hline
+\end{tabular} }
+\end{table*}
+
+ 
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Modular based}
+ 
+ 
+% Citations to add
+%
+% Citation for AFME
+%
+% Middlewares: Impala, Smart Messages, Agilla, AFME, ActorNet, MAPS, MASPOT, TinyMAPS
+In this approach, applications are divided as modular programs to facilitate injection and distribution through
+the network using mobile agents for collecting local data. In their seminal paper\cite{lange1999reasons},
+Lange and Oshima present at least seven reasons for using mobile agents in generic distributed systems.
+In the context of WSNs, the most relevant ones are: network load reduction, network lantency
+overcoming, protocol encapsulation, asynchronous and autonomous execution, robustness and fault-tolerance,
+dynamic adaptation and orientation to heterogeneity.
+ 
+\textit{Network load reduction.}  Mobile agents are lightweight modules and can be transfered between nodes to access remote resources
+in order to save bandwidth resources. Also, a mobile agent with data processing capabilities can perform the needed operations on a
+particular node and transmit the results to a sink. This avoids periodically sending raw sensed data from a node to the sink for computation
+and data processing.
+ 
+\textit{Network latency overcoming.} Agents can move to a remote node to perform required control tasks. This reduces the network
+latency and will not affect the real-time control operations also in case of lack network connectivity with the base station.
+ 
+\textit{Protocol encapsulation.} Mobile agents also facilitate easy modification application logic
+ 
+\textit{Asynchronous and autonomous execution.} A mobile agent can traverse the network to gather the required information in order to
+perform the required tasks and asynchronously send the result to the requester.
+ 
+\textit{Dynamic adaptation.} Mobile agents can react autonomously to changes in the execution environment.
+ 
+\textit{Robustness and fault-tolerance.} The mobile agents have the ability to dynamically react to events (e.g., low battery level) and can lead
+to a robust and fault tolerant system (e.g., by migrating all executing agents to a similar node in order to continue their tasks).
+ 
+\textit{Orientation to heterogeneity.} Mobile agents can offer a layer of abstraction among systems based on different hardware and software.
+This ability enables the integration of heterogeneous WSNs supporting a variety of sensor platforms or connecting WSN and other networks
+(like IP-based networks). However, the solutions presented in this survey do not facilitate this aspect. All have been designed for and tested
+on a specific hardware/software platform.
+ 
+In addition to \cite{aiello2008agents}, broadcasting lightweight modules consumes considerably less energy instead of the complete application\cite{cecilio2014existing}.
+ 
+% Impala 2003
+Impala\cite{liu2003impala} is a middleware solution that enables application modularity, adaptivity, and repairability in WSNs.
+This system was part of the ZebraNet project, a mobile sensor network system for improving tracking technology
+via energy-efficient tracking nodes and peer-to-peer communication techniques. Impala adopts OTAP (i.e., Over-The-Air Programming)
+for updating the firmware on the nodes and describes a software architecture best suited for minimal performance and energy
+impact for code running on resource constrained nodes. Mobility, openness, and scalability are supported by changing between
+different protocols and modes of operation depending on the applications and network conditions. Impala is designed to execute
+only on Hewlett-Packard/Compaq iPAQ Pocket PC handheld devices running Linux.
+ 
+% Smart Messages 2004
+Another modular based middleware is Smart Messages\cite{kang2004smartmessages} which proposes an autonomous
+network architecture for large-scale embedded systems (NES). NES are known for restriction of resources, heterogeneity, and volatile nodes.
+SMs aim to overcome these limitations by migrating the execution to nodes of interest, using application-controlled routing, instead of
+end-to-end communication between nodes. The main contribution of this middleware is high-flexibility in the presence of dynamic network
+configurations. SMs have also been designed and tested on Hewlett-Packard/Compaq iPAQ Pocket PC handheld devices running Linux.
+ 
+% Agilla
+Agilla\cite{fok2009agilla} is another example of this approach designed for WSNs and aims to reduce the code size by employing
+a stack-based architecture. The purpose of this middleware is to support self-adaptiveness within the WSN by deploying up to four
+autonomous mobile agents in each node. Agilla uses a \textit{tuple space} structure to ensure consistency in a dynamic environment
+and to ensure scalability. A \textit{tuple space} is a type of shared memory in which data is structured as tuples and is accessed via
+pattern-matching. In Agilla, the mobile agents are using \textit{tuple space} to discover properties of the environment.
+To ensure scalability, application algorithms are designed to use local knowledge and interactions. Agilla runs only on top of TinyOS and
+was deployed on Mica2, MicaZ, Tyndall 25mm and TelosB nodes.
+ 
+% ActorNet
+\textit{ActorNet}\cite{kwon2005actorne} is a mobile agent platform for WSNs designed to overcome the difficulties in allowing code
+migration and interoperability due to the strict coupling between applications and sensor node architectures. ActorNet introduces
+services like virtual memory, context switching and multi-tasking to enable the execution of complex, highly dynamic mobile
+agent applications in the severely resource-constrained environment of WSNs. ActorNet has been specifically designed for TinyOS
+on Mica2 sensor nodes.
+ 
+% AFME
+The AFME (Agent Factory Micro Edition)\cite{muldroon2006afme} middleware is a lightweight version of the Agent Factory framework
+purposely designed for wireless pervasive systems to tackle the performance and memory footprint issues associated with executing agents
+on mobile devices. It enables the creation of agent based applications on computationally constrained devices such as cellular digital mobile phones.
+AFME was developed for J2ME enabled PDAs and then ported onto Sun SPOTs.
+ 
+% MAPS
+MAPS (Mobile Agent Platform for Sun SPOT)\cite{aiello2010maps} is a Java-based framework for WSNs based on Sun SPOT techology
+which enables agent-oriented programming of WSN applications. MAPS offers a set of services to support mobile agents including
+message transmission, agent creation, agent cloning, agent migration, time handling, and easy access to the sensor node resources.
+The dynamic behaviour of agents is modeled as an ECA-based automaton. MAPS is also desgined to run only on Sun SPOTs.
+ 
+% MASPOT
+MASPOT\cite{lopes2011maspot} is another java-based mobile agent system for WSNs and builds on the concepts presented in
+AFME and MAPS by providing code migration. This means that mobile agents can migrate to a node that is not yet configured. Additionally,
+MASPOT also includes an agent management service.
+ 
+% TinyMAPS
+TinyMAPS\cite{aiello2012tinymaps} derives from MAPS and is designed for devices more constrained than the Sun SPOTs.
+TinyMAPS can be considered as a porting of MAPS onto the Scentilla JCreate sensor platform. Scentilla sensors are much more
+resource-constrained than Sun SPOT sensors.
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+ 
+ 
+ 
+%\newpage
+
+\begin{table*}[h!]
+
+\caption{Summary of the IoT middlewares in terms of supported
+non-functional
+ requirements}
+\label{tab2}
+ \centering
+
+ {\scriptsize  \begin{tabular}{ |l|l|l|l|l|l|l|} \cline{1-7}
+\multicolumn{7}{|c|}{Non-functional requirements}\\
+\hline
+& Scalability  & Security & Avaliability & Reliability & Real-time & Privacy \\
+\hline
+\multicolumn{7}{|c|}{Event-based}\\
+%& Scalability  & Security & Avaliability & Reliability & Real-time & Privacy \\
+\hline
+Prisma & NL & NS&  NI& NI &  NRT& NI\\
+\hline
+Emma & NI & NI& NS & NS& HRT& NI\\
+\hline
+Hermes & AL& NI& S& NS& HRT& NI\\
+\hline
+Green & NL& NI& S& NS&HRT& NI\\
+\hline
+Mires & NL & NS & S & NS & NRT& NS \\
+\hline
+SensorBus &NI & S& S&NS &NRT& S \\
+\hline
+
+\multicolumn{7}{|c|}{Service-oriented}\\
+ \hline
+ Hydra & AL, NLWSNS & NS & NI & NI & SRT & NS\\
+ \hline
+SOCRADES~\cite{SOCRADES10} & AL, NLIoTS & C & NI & NI & SRT & NS\\
+ \hline
+ SenseWrap~\cite{SenseWrap09} & AL, NLIoTS & C & NI & NI & SRT & NS\\
+ SENSEI~\cite{SENSEI10} & AL, NLWSNS & C & NI & NI & SRT & S\\
+ \hline
+UbiSOAP &N/A & Yes & Yes& Yes & No& N/A \\
+\hline
+
+ CarrIoT & Yes & N/A& Yes & Yes& Yes& N/A\\
+ \hline
+ SicsthSense & N/A& N/A& N/A & N/A &N/A & N/A\\
+ \hline
+
+
+\multicolumn{7}{|c|}{Component based approach}\\
+\hline
+\multicolumn{7}{|c|}{Agent-based approach}\\
+\hline
+ActorNet &N/A & N/A&N/A &N/A &N/A& N/A\\
+\hline
+Agilla & N/A & Yes& Yes& Yes& N/A& No\\
+\hline
+AFME &N/A & N/A& N/A& N/A& N/A& N/A \\
+\hline
+Impala &N/A &Yes &  Yes&  N/A& Yes& N/A \\
+\hline
+%& Scalability  & Security & Avaliability & Reliability & Real-time & Privacy \\
+Maps &N/A & N/A& N/A& N/A& N/A& N/A \\
+\hline
+Maspot & N/A & N/A & N/A& N/A& No& N/A\\
+\hline
+Smart Messages & N/A & N/A & N/A& N/A& N/A& N/A\\
+\hline
+TinyMAPS & N/A & N/A & N/A& N/A& N/A& N/A\\
+\hline
+\multicolumn{7}{|c|}{Tuple space approach}\\
+\hline
+LIME &NI & NS& S&NS &HRT& S\\
+\hline
+UbiROAD &NI &S & S& NS&NRT& S\\
+\hline
+TeenyLIME & NI &NS & NS&NS &NRT &NS \\
+\hline
+TinyLime & NI & S & NS &NS &NRT& S\\
+\hline
+TS-Mid &NI &NS & NS&NS &NRT&NS \\
+\hline
+\multicolumn{7}{|c|}{Virtual machine approach}\\
+ \hline
+MAgNet & No& No& N/A &N/A &No& Yes\\
+ \hline
+Mate & No & Yes & N/A &N/A & No& N/A\\
+ \hline
+Muse & N/A& Yes&  N/A& N/A& No& No\\
+ \hline
+%& Scalability  & Security & Avaliability & Reliability & Real-time & Privacy \\
+SwissQM &N/A &N/A &N/A &N/A &N/A& N/A\\
+\hline
+\multicolumn{7}{|c|}{Database approach}\\
+\hline
+SINA &NL &NS &NS &NS & NRT & NS\\
+\hline
+IrisNet & NI & NS & S& NS& HRT& S\\
+\hline
+HyCache & AL & NI &NS &S & NRT& NI \\
+\hline
+GSN &AL &S & S& NI& HRT&NS \\
+\hline
+KSpot\textsuperscript{+} & NL & S & S& NI& NRT& NS\\
+\hline
+Cougar & NL & S& S& NI & HRT&S \\
+\hline
+DsWare & NL & NS & NI & S & HRT& NS\\
+\hline
+Sensation & NL& NS &S & NI& HRT& NS\\
+\hline
+TinyDB & NI & NS  & NS& NS&  NRT & NS\\
+\hline
+\multicolumn{7}{|c|}{Application driven approach}\\
+\hline
+Milan & N/A & Yes & Yes& N/A& No& N/A\\
+\hline
+MidFusion & N/A & Yes &  Yes& N/A& Yes& No\\
+\hline
+%& Scalability  & Security & Avaliability & Reliability & Real-time & Privacy \\
+Adaptive Middleware &N/A &N/A & N/A& N/A& No& N/A\\
+\hline
+AutoSec &Yes & N/A & Yes & Yes& Yes& N/A \\
+\hline
+\multirow{1}{*}{\textbf{Legend}} & Application Level (AL)  & Confidentiality(C)
+& Supported (S) & Communication (CR) & Hard Real-Time (HRT) & Supported (S)\\
+%\hline
+& Network level (NL) & Integrity (I) &  &
+  & Soft Real-Time (SRT) & \\
+%\hline
+ Not Supported (NS)  &\hspace{1mm}-IoT Scale(IoTS) & Availability (A) & & Data
+ (DR) & Non Real-Time (NRT)  &  \\
+No information (NI)  &\hspace{1mm}-WSN Scale(WSNS) & & & &   &  \\
+
+\hline
+\end{tabular} } \end{table*}
+
+
+%\newpage
+
+\begin{table*}[h!]
+\caption{Summary of the IoT middlewares in terms of supported
+architectural
+ requirements}
+\label{tab3}
+ \centering
+{\scriptsize  \begin{tabular}{ |l|l|l|l|l|l|l|l|l|} \cline{1-9}
+\multicolumn{9}{|c|}{Architectural requirements}\\
+\hline
+& Abstraction & Interoperable & Context-aware & Autonomous & Adaptive & Service-Oriented & Lightweight & Distributed \\
+\hline
+\multicolumn{9}{|c|}{Event-based}\\
+\hline
+Prisma & REST & NL,AL & Monitor & NS & NS & Yes & Yes & Yes\\
+\hline
+Emma &NI & NS &NS & NS& Yes& Yes& Yes& Yes\\
+\hline
+Hermes & Yes& NS& NS & NS & NS& Yes& No& Yes\\
+\hline
+Green & XML& NS& Filter& NS & NS& Yes& No& Yes\\
+\hline
+Mires & NesC& NS& NS & NS & NS& Yes& NS& Yes\\
+\hline
+SensorBus & Yes&No &Yes & No&No &Yes & No & Yes\\
+\hline
+
+
+\multicolumn{9}{|c|}{Service-oriented}\\
+\hline
+Hydra & S & NI,SI,SeI & Y & NeI & DA & Y & E & Y\\
+\hline
+SOCRADES~\cite{SOCRADES10} & S & NeI & Y & Y & DA & Y & NI & Y\\
+\hline
+SenseWrap~\cite{SenseWrap09}& S & NeI & NI & NI & SA & Y & M & Y\\
+\hline
+SENSEI~\cite{SENSEI10}& S & NeI, SeI & Y & NI & DA & Y & NI & Y\\
+\hline
+CarrIoT & Yes & Yes & N/A& Yes& Yes& Yes& N/A& N/A\\
+\hline
+SicsthSense & Yes & N/A & N/A & N/A&N/A & N/A& N/A& N/A\\
+\hline
+UbiSOAP & N/A & Yes & Yes & Yes & No& Yes& Yes& Yes\\
+\hline
+
+
+
+\multicolumn{9}{|c|}{Component based}\\
+\hline
+\multicolumn{9}{|c|}{Agent-based approach}\\
+\hline
+ActorNet &N/A & N/A& N/A& N/A& N/A& N/A&N/A &N/A\\
+\hline
+Agilla &Yes &No & Yes& Yes& Yes& N/A& N/A& N/A\\
+\hline
+AFME &N/A & N/A& N/A& N/A& N/A& N/A&N/A &N/A\\
+\hline
+Impala & Yes &Yes & N/A& Yes&  Yes& N/A & Yes & N/A\\
+\hline
+Maps &N/A & N/A& N/A& N/A& N/A& N/A&N/A &N/A\\
+%& Programming Abstraction & Interoperable & Context-aware & Autonomous & Adaptive & Service-Oriented & Lightweight & Distributed \\
+\hline
+Maspot &Yes & N/A& N/A & N/A& N/A & Yes & N/A &Yes\\
+\hline
+Smart Messages &N/A & N/A& N/A& N/A& N/A& N/A&N/A &N/A\\
+\hline
+TinyMAPS &N/A & N/A& N/A& N/A& N/A& N/A&N/A &N/A\\
+\hline
+\multicolumn{9}{|c|}{Tuple space approach}\\
+\hline
+LIME &GVDS &Yes &Yes &NS & NS& NI& Yes& Yes\\
+\hline
+UbiROAD & NI&Yes &Yes &Yes &NI &Yes & No&Yes\\
+\hline
+TeenyLIME &Yes & NI& NI& NI& NI& NS& Yes& Yes\\
+\hline
+TinyLime &Yes & NS& Yes& Yes& NS &NI & NI&Yes\\
+\hline
+TS-Mid &Yes &NS &NS &NS & NS& NS& No &Yes\\
+\hline
+\multicolumn{9}{|c|}{Virtual machine approach}\\
+\hline
+%& Programming Abstraction & Interoperable & Context-aware & Autonomous & Adaptive & Service-Oriented & Lightweight & Distributed \\
+MAgNet &No & No& N/A& Yes& No & Yes& No& Yes\\
+ \hline
+Mate & Yes &N/A &N/A &N/A & Yes &N/A &N/A &N/A\\
+ \hline
+Muse &No  &No &No & No& No& Yes& Yes&Yes\\
+ \hline
+SwissQM & Yes & N/A& N/A& N/A& N/A&N/A & N/A&N/A\\
+ \hline
+\multicolumn{9}{|c|}{Database approach}\\
+%& Programming Abstraction & Interoperable & Context-aware & Autonomous & Adaptive & Service-Oriented & Lightweight & Distributed \\
+\hline
+SINA & Yes& No& No& No& Yes& No&No &Yes\\
+\hline
+IrisNet &N/A & N/A& N/A& N/A& N/A& N/A&N/A &N/A\\
+\hline
+HyCache & N/A & N/A & N/A & N/A & N/A & No & No & Yes\\
+\hline
+GSN &Yes & N/A &N/A &N/A &Yes &Yes &N/A &N/A\\
+\hline
+KSpot\textsuperscript{+} &N/A & N/A& N/A& N/A& N/A& N/A&N/A &N/A\\
+\hline
+Cougar &N/A & N/A& N/A& N/A& N/A& N/A&N/A &N/A\\
+\hline
+DsWare & N/A &N/A & Yes& N/A& N/A& Yes& Yes& Yes\\
+\hline
+Sensation & Yes& Yes& Yes& Yes& No& N/A& N/A& Yes\\
+\hline
+TinyDB & Yes & N/A & N/A& No&  No&N/A & N/A & N/A\\
+\hline
+\multicolumn{9}{|c|}{Application driven approach}\\
+\hline
+Milan & Yes & Yes & Yes & No& No &Yes & No& Yes\\
+%& Programming Abstraction & Interoperable & Context-aware & Autonomous & Adaptive & Service-Oriented & Lightweight & Distributed \\
+\hline
+MidFusion & Yes & No & Yes& Yes& Yes & No &Yes &\\
+\hline
+Adaptive Middleware & No &No & No& No& Yes & No& No &Yes\\
+\hline
+AutoSec & N/A & No& Yes& Yes& Yes& No& Yes&\\
+\hline
+
+\multirow{1}{*}{\textbf{Legend}} & Supported (S)  & Network (NeI) &
+Yes (Y) & Yes (Y) & Dynamically (DA) & Yes (Y)& Energy (E) & Yes (Y)\\
+
+  Not Supported (NS) & Not Supported (NS) & Syntactic (SI) & Not (N) & Not (N) &
+  Statically (SA) & Not (N) & Memory(M) & Not (N)\\
+%\hline
+ No Information (NI) &  & Semantic (SeI) &  &  & &  &  & \\
+
+\hline
+
+\end{tabular} } \end{table*}
+
+%\newpage
+ 
+ \begin{table*}[h!]
+\caption{Summary of the IoT groups of middleware in terms of
+supported architectural
+ requirements}
+\label{tab3}
+ \centering
+{\tiny \begin{tabular}{ |l|l|l|l|l|l|l|l|l|} \cline{1-9}
+\multicolumn{9}{|c|}{Architectural requirements}\\
+\hline
+& Programming Abstraction & Interoperable & Context-aware & Autonomous & Adaptive & Service-Oriented & Lightweight & Distributed \\
+\hline Event-based & Partially& Partially  & Partially & Mostly No & Partially & Mostly Yes&Mostly Yes &Mostly Yes \\
+\hline Service-oriented & Mostly Yes & Partially & Partially & Partially & Mostly Yes & Mostly Yes& Partially&Partially\\
+\hline Component-based & Mostly Yes & Partially & Partially & Partially & Mostly Yes & Mostly Yes& Partially&Partially\\
+\hline Agent-based & Partially & Partially & N/A & Partially & Partially & N/A & N/A &N/A\\
+\hline Tuple space approach & Mostly Yes & Partially & Partially & Partially & Mostly No & Partially&Partially &Mostly Yes\\
+\hline Virtual machine approach & Partially & Mostly No & Mostly No& Partially & Partially & Partially& Partially&Partially\\
+\hline Data-based approach & Partially & Partially & Partially & Partially & Partially & Partially&Partially &Partially\\
+\hline Application driven approach & Partially & Mostly No & Mostly Yes & Partially & Mostly Yes & Mostly No& Partially & Mostly Yes\\
+\hline
+\end{tabular} } \end{table*}
+
+ 
+\section{Challenges and Open Issues}
+ 
+\subsection{Challenges in designing middleware}
+\begin{enumerate}
+\item Limited power and resources
+\begin{enumerate}
+    \item Advance microelectronics technology allows tiny devices but limited in energy and resources, i.e. CPU and memory.
+    \item Middleware should provide mechanisms for efficient processor and memory use while enabling lower-power communication and prolong sensor node lifetime. i.e. sleep mode, minimize number of transmission.
+\end{enumerate}
+ 
+\item Scalability, mobility, and dynamic network topology
+\begin{enumerate}
+    \item As the application grows, device failure, moving obstacles, mobility, and interference, the network will change frequently.
+    \item Middleware should maintain performance and robust operation while network changes dynamically. Also, It should support mechanisms for fault tolerance and sensor node self-configuration and self-maintenance.
+\end{enumerate}
+ 
+\item Heterogeneity
+\begin{enumerate}
+    \item CPU-power, networking, memory and storage, operating systems.
+    \item Middleware should able to interface various kinds of hardware, software and networks.
+\end{enumerate}
+ 
+\item Dynamic network organization
+\begin{enumerate}
+    \item In most situation, Client/Server mode is impossible, no infrastructure is not available.
+    \item Middleware should support Ad-hoc capability to discover resource and its location which affect the trade-offs among latency, reliability, and energy.
+\end{enumerate}
+ 
+\item Real-world integration
+\begin{enumerate}
+    \item Most of the applications are dealing with real-time phenomena.
+    \item Middleware should provide real-time services.
+\end{enumerate}
+ 
+\item Application knowledge
+\begin{enumerate}
+    \item Developer would like to inject application knowledge to the network so as to map application communication requirements to it,
+    \item Middleware design should balance between application specificity and middleware generality.
+\end{enumerate}
+ 
+\item Data aggregation
+\begin{enumerate}
+    \item Network generate lots of redundant data, communications cost is much higher than computational cost. For example, sending a single bit can consume the same energy as executing 1000 instructions
+    \item Middleware should able to aggregate data to eliminate redundancy and minimize the number of transmissions to the sink.
+\end{enumerate}
+ 
+\item Security
+\begin{enumerate}
+\item Middleware efforts should concentrate on developing and integrating security in the initial phases of software design, hence achieving different security requirements such as authentication, integrity, freshness, and availability.
+\end{enumerate}
+\end{enumerate}
+ 
+ 
+ 
+ 
+\begin{itemize}
+\item Privacy, Identity Management, Security and Access control: IoT presents significant challenges in terms of who can see what with which credentials
+(recalling that the entities are no longer only people, but might be any form of IoT ``appliance''). The recent Stuxnet worm presents an excellent example of a malicious
+"software actor" that has the potential to effect major physical changes in industrial processes. How does one guard against this type phenomenon in the IoT world?
+\item Standardization and Interoperability: How do we make sure that the hugely diverse technology platform continues to act in a platform manner i.e. ensuring
+that we do not have to re-invent the wheel every time we develop a new application or, indeed, a sensor that needs to plug into the IoT.
+\item Data deluge: The IoT shares many of the key challenges similar to large scale data initiatives as identified in the e-Infrastructure domain.
+How do we deal with the data stream of billions of "actors"? How do we ensure the data remains usable for future generations?
+\item Scalability: Management of a network consists of trillion heterogeneous devices will be a serious challenge.
+\end{itemize}
+ 
+
+
+%% End of v2-acmsmall-sample.tex (March 2012) - Gerry Murray, ACM
+
+
+%----------------------------------------------------------
+% Style and layout of the references
+%\bibliographystyle{elsarticle-num}
+\bibliographystyle{IEEEtran}
+\bibliography{MDRef} % Bibliography file (usually '*.bib' )
+
+
+
+% that's all folks
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
